@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Kate Ong-iko — UI/UX Designer, illustrator, and developer</title>
+  <title>kmong-iko — UI/UX Designer, illustrator, and developer</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E☕%3C/text%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,10 +30,16 @@
       <a href="#contact">Contact</a>
     </nav>
 
-    <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
-      <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
-      <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
-    </button>
+    <div class="controls">
+      <button class="icon-button sound-toggle" type="button" aria-pressed="true" aria-label="Mute sound">
+        <svg class="icon icon--sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+        <svg class="icon icon--sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6m0-6 6 6"/></svg>
+      </button>
+      <button class="icon-button theme-toggle" type="button" aria-label="Switch to dark mode">
+        <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
   </header>
 
   <main class="page">
@@ -44,7 +50,7 @@
 
     <div class="stage">
       <!-- Character scene: every layer shares the artwork's coordinate space (--x, --y, --w are % of the scene). -->
-      <div class="scene" data-pose="typing">
+      <div class="scene" data-pose="typing" data-key="down">
         <img class="layer layer--back-hair" src="imgs/back-hair.webp" alt="" width="1240" height="1182" draggable="false" style="--x:34.132%;--y:0.000%;--w:64.617%">
         <img class="layer layer--body-typing" src="imgs/body-typing.webp" alt="" width="867" height="588" draggable="false" style="--x:39.760%;--y:63.296%;--w:45.180%">
         <img class="layer layer--body-idle" src="imgs/body-idle.webp" alt="" width="867" height="588" draggable="false" style="--x:39.760%;--y:63.296%;--w:45.180%">

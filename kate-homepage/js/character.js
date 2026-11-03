@@ -4,9 +4,17 @@
 const ART_WIDTH = 1919;                                   // cropped artwork width
 const EYE_CENTER = { x: (1163 - 20) / ART_WIDTH, y: (795 - 16) / 1602 }; // between the eyes, as scene fractions
 const MAX_PUPIL_MOVE = { x: 26, y: 18 };                  // the pupil-cover layer clips any overshoot
-const EYE_EASING = 0.16;                                  // 0–1, higher = snappier
-const IDLE_DELAY_MS = 1500;                               // inactivity before she stops typing
+const EYE_EASING = 0.16;                                  // 0–1, higher = snappier (following the cursor)
+const EYE_RETURN_EASING = 0.07;                           // slower, so the eyes drift back to the laptop
+const IDLE_DELAY_MS = 1500;                               // inactivity before she stops typing and looks at the laptop
 const TOUCH_TYPING_INTERVAL_MS = 6000;                    // touch devices: short typing bursts
+
+/* Typing rhythm: bursts of fast key presses alternate with slower ones. Each value is a [min, max] in ms
+   between key-down / key-up frames, and how many frame changes a burst lasts. */
+const TYPING_PACES = {
+  fast: { interval: [60, 120], changes: [6, 14] },
+  slow: { interval: [220, 420], changes: [2, 4] },
+};
 
 const WELCOME_MESSAGE = 'Hi, I’m Kate! Welcome to my little corner of the web.';
 const RANDOM_MESSAGES = [
@@ -31,6 +39,7 @@ export function initCharacter(scene) {
   const restingGaze = () => ({ x: -0.55 * MAX_PUPIL_MOVE.x, y: 0.5 * MAX_PUPIL_MOVE.y }); // glance at the laptop
   let current = restingGaze();
   let target = { ...current };
+  let easing = EYE_EASING;
   let sceneRect, pixelScale, frame = 0;
 
   const measure = () => {
@@ -44,7 +53,7 @@ export function initCharacter(scene) {
   };
 
   const animateEyes = () => {
-    const ease = prefersReducedMotion ? 1 : EYE_EASING;
+    const ease = prefersReducedMotion ? 1 : easing;
     current.x += (target.x - current.x) * ease;
     current.y += (target.y - current.y) * ease;
     renderEyes();
@@ -52,10 +61,12 @@ export function initCharacter(scene) {
     frame = settled ? 0 : requestAnimationFrame(animateEyes);
   };
 
-  const setGaze = (gaze) => {
+  const setGaze = (gaze, ease = EYE_EASING) => {
     target = gaze;
+    easing = ease;
     if (!frame) frame = requestAnimationFrame(animateEyes);
   };
+  const returnGazeToLaptop = () => setGaze(restingGaze(), EYE_RETURN_EASING);
 
   const lookAt = (clientX, clientY) => {
     const dx = clientX - (sceneRect.left + EYE_CENTER.x * sceneRect.width);
@@ -66,20 +77,43 @@ export function initCharacter(scene) {
   };
 
   /* ---- Typing / idle pose ---- */
+  const randomBetween = ([min, max]) => min + Math.random() * (max - min);
+  let typingTimer = 0, keyIsDown = true, pace = 'fast', changesLeft = 0;
+
+  // Alternates the key-down / key-up body frames at randomised intervals.
+  const typeStep = () => {
+    keyIsDown = !keyIsDown;
+    scene.dataset.key = keyIsDown ? 'down' : 'up';
+    if (--changesLeft <= 0) {
+      pace = pace === 'fast' ? 'slow' : 'fast';
+      changesLeft = Math.round(randomBetween(TYPING_PACES[pace].changes));
+    }
+    typingTimer = setTimeout(typeStep, randomBetween(TYPING_PACES[pace].interval));
+  };
+  const startTyping = () => { if (!typingTimer && !prefersReducedMotion) typeStep(); };
+  const stopTyping = () => {
+    clearTimeout(typingTimer);
+    typingTimer = 0;
+    keyIsDown = true;
+    scene.dataset.key = 'down';
+  };
+
   let idleTimer;
   const wake = () => {
     scene.dataset.pose = 'typing';
+    startTyping();
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
       scene.dataset.pose = 'idle';
-      if (isTouch) setGaze(restingGaze());
+      stopTyping();
+      returnGazeToLaptop();
     }, IDLE_DELAY_MS);
   };
 
   const onPointer = (event) => { lookAt(event.clientX, event.clientY); wake(); };
   addEventListener('pointermove', onPointer, { passive: true });
   addEventListener('pointerdown', onPointer, { passive: true });
-  document.addEventListener('mouseleave', () => { if (!isTouch) setGaze(restingGaze()); });
+  document.addEventListener('mouseleave', returnGazeToLaptop);
   if (isTouch) setInterval(() => { if (!document.hidden) wake(); }, TOUCH_TYPING_INTERVAL_MS);
 
   /* ---- Click to talk ---- */
