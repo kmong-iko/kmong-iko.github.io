@@ -1,0 +1,250 @@
+/* ==========================================================================
+   Kate's homepage
+   1. Tokens & themes   2. Base   3. Header   4. Page layout
+   5. Character scene   6. Speech bubble   7. Footer   8. Motion preferences
+   ========================================================================== */
+
+/* 1. Tokens & themes ------------------------------------------------------ */
+/* Dark mode is the light palette inverted (255 − channel). Images are untouched. */
+:root {
+  --bg: #fffca5;
+  --ink: #000000;
+  --accent: #ff8800;
+  --nav: #a33100;
+  --muted: #a33100;
+  --bubble-bg: #fff8dc;
+  --bubble-ink: #4a1a08;
+  --bubble-line: #7a2a12;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #00035a;
+  --ink: #ffffff;
+  --accent: #0077ff;
+  --nav: #5ccefe;
+  --muted: #5ccefe;
+  --bubble-bg: #0007a3;
+  --bubble-ink: #b5e5f7;
+  --bubble-line: #85d5ed;
+  color-scheme: dark;
+}
+
+/* 2. Base ----------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1rem/1.4 "Work Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+
+.icon { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 3. Header --------------------------------------------------------------- */
+.site-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 4.5rem 0;
+}
+
+.nav { display: flex; gap: clamp(1.1rem, 3vw, 2.6rem); }
+
+.nav a {
+  padding: 0.25rem 0.1rem;
+  border-bottom: 2px solid transparent;
+  color: var(--nav);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+}
+.nav a:hover { border-color: currentColor; }
+
+.theme-toggle {
+  position: absolute;
+  top: 1.2rem;
+  right: clamp(1rem, 3vw, 2.2rem);
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+.theme-toggle .icon { width: 1.9rem; height: 1.9rem; stroke-width: 1.6; transition: transform 0.25s; }
+.theme-toggle:hover .icon { transform: rotate(18deg); }
+.theme-toggle .icon--moon,
+:root[data-theme="dark"] .theme-toggle .icon--sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon--moon { display: block; }
+
+/* 4. Page layout ---------------------------------------------------------- */
+/* Mobile first: hero on top, character centred below. */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+}
+
+.hero { padding: 2rem clamp(1.5rem, 6vw, 5rem) 0; text-align: center; }
+.hero h1 { margin: 0; font-size: clamp(2.5rem, 5.4vw, 4.5rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.01em; }
+.hero__name { color: var(--accent); }
+.hero__subtitle { margin: 0.7rem 0 0; font-size: clamp(1rem, 1.5vw, 1.25rem); }
+
+.stage {
+  align-self: center;
+  width: min(94vw, 560px, max(16rem, calc((100dvh - 19rem) * 1.198)));
+  margin-top: 1rem;
+}
+
+/* Desktop: text left, character bottom-right, in a two-column grid (no absolute positioning). */
+@media (min-width: 761px) {
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+  .hero { align-self: center; padding: 0 0 0 clamp(2rem, 6.4vw, 5.5rem); text-align: left; }
+  .hero h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); }
+  .stage {
+    align-self: end;
+    margin: 0 clamp(0.5rem, 3.5vw, 3rem) 0 0;
+    width: min(50vw, 1000px, calc((100dvh - 9rem) * 1.198));
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header { padding-inline: 2.75rem; }
+  .nav { gap: clamp(0.6rem, 3vw, 1.1rem); font-size: clamp(0.78rem, 3.5vw, 1rem); }
+  .theme-toggle { right: 0.4rem; top: 1.1rem; }
+}
+
+@media (max-width: 420px) {
+  .site-header { justify-content: flex-start; padding-left: 0.9rem; }
+}
+
+/* 5. Character scene ------------------------------------------------------ */
+.scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1919 / 1602; /* the cropped artwork canvas */
+  container-type: inline-size;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.layer {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+
+/* Body: the typing frame always sits underneath, so the idle frame fades in without flicker. */
+.layer--body-idle { opacity: 0; transition: opacity 0.14s linear; }
+.scene[data-pose="idle"] .layer--body-idle { opacity: 1; }
+
+.layer--pupils { will-change: transform; } /* moved by js/character.js */
+
+.layer--mouth-open { opacity: 0; }
+.scene.is-talking .layer--mouth-open { opacity: 1; }
+.scene.is-talking .layer--mouth-closed { opacity: 0; }
+
+/* Draggable cup (physics in js/cup.js). touch-action only affects touches that start on the cup. */
+.layer--cup {
+  z-index: 7;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+.layer--cup.is-dragging { cursor: grabbing; }
+
+/* Click target over the head (the avatar). */
+.scene__head {
+  position: absolute;
+  left: 42.6%;
+  top: 19.3%;
+  width: 47.3%;
+  height: 49.3%;
+  z-index: 5;
+  padding: 0;
+  border: 0;
+  border-radius: 48%;
+  background: none;
+  cursor: pointer;
+}
+
+/* 6. Speech bubble -------------------------------------------------------- */
+.bubble {
+  position: absolute;
+  left: 3%;
+  top: 8%;
+  z-index: 6;
+  width: 38%;
+  min-width: 8.5rem;
+  padding: 0.7em 0.9em;
+  border: 0.2em solid var(--bubble-line);
+  border-radius: 1.1em;
+  background: var(--bubble-bg);
+  color: var(--bubble-ink);
+  font-size: max(0.8rem, 2.7cqw);
+  font-weight: 500;
+  line-height: 1.3;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.85) translateY(0.4em);
+  transform-origin: 100% 100%;
+  transition: opacity 0.18s, transform 0.22s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.bubble.is-visible { opacity: 1; transform: none; }
+
+.bubble::after { /* tail pointing at the head */
+  content: "";
+  position: absolute;
+  right: -0.62em;
+  bottom: 1.1em;
+  width: 0.9em;
+  height: 0.9em;
+  border: solid var(--bubble-line);
+  border-width: 0.2em 0.2em 0 0;
+  border-radius: 0 0.2em 0 0;
+  background: var(--bubble-bg);
+  transform: rotate(45deg) skew(8deg, 8deg);
+}
+
+/* 7. Footer --------------------------------------------------------------- */
+.site-footer { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 1rem 1rem 1.1rem; }
+.site-footer small { color: var(--muted); font-size: 0.72rem; }
+
+.social { display: flex; gap: 1.1rem; }
+.social a { display: grid; place-items: center; width: 2rem; height: 2rem; color: var(--accent); transition: transform 0.2s; }
+.social a:hover { transform: translateY(-3px); }
+.social .icon { width: 1.7rem; height: 1.7rem; stroke-width: 2; }
+
+/* 8. Motion preferences --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}

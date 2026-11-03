@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kate Ong-iko — UI/UX Designer, illustrator, and developer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E☕%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Apply the saved (or system) theme before first paint to avoid a flash. -->
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem('theme'); } catch (e) {}
+      if (!theme) theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="#about">About Me</a>
+      <a href="#workfolio">Workfolio</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
+      <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+    </button>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1>Hello! <span class="hero__name">I’m Kate.</span></h1>
+      <p class="hero__subtitle">UI/UX Designer, illustrator, and developer</p>
+    </section>
+
+    <div class="stage">
+      <!-- Character scene: every layer shares the artwork's coordinate space (--x, --y, --w are % of the scene). -->
+      <div class="scene" data-pose="typing">
+        <img class="layer layer--back-hair" src="imgs/back-hair.webp" alt="" width="1240" height="1182" draggable="false" style="--x:34.132%;--y:0.000%;--w:64.617%">
+        <img class="layer layer--body-typing" src="imgs/body-typing.webp" alt="" width="867" height="588" draggable="false" style="--x:39.760%;--y:63.296%;--w:45.180%">
+        <img class="layer layer--body-idle" src="imgs/body-idle.webp" alt="" width="867" height="588" draggable="false" style="--x:39.760%;--y:63.296%;--w:45.180%">
+        <img class="layer layer--laptop" src="imgs/laptop.webp" alt="" width="1192" height="687" draggable="false" style="--x:0.000%;--y:57.116%;--w:62.116%">
+        <img class="layer layer--cup" src="imgs/cup.webp" alt="" width="300" height="207" draggable="false" style="--x:84.367%;--y:87.079%;--w:15.633%">
+        <img class="layer layer--head-base" src="imgs/head-base.webp" alt="" width="908" height="789" draggable="false" style="--x:42.574%;--y:19.288%;--w:47.316%">
+        <img class="layer layer--blush" src="imgs/blush.webp" alt="" width="505" height="159" draggable="false" style="--x:46.639%;--y:51.561%;--w:26.316%">
+        <img class="layer layer--pupils" src="imgs/pupils.webp" alt="" width="531" height="180" draggable="false" style="--x:45.753%;--y:43.258%;--w:27.671%">
+        <img class="layer layer--pupil-cover" src="imgs/pupil-cover.webp" alt="" width="625" height="369" draggable="false" style="--x:44.659%;--y:38.764%;--w:32.569%">
+        <img class="layer layer--lower-lash-left" src="imgs/lower-lash-left.webp" alt="" width="114" height="46" draggable="false" style="--x:46.535%;--y:51.873%;--w:5.941%">
+        <img class="layer layer--lower-lash-right" src="imgs/lower-lash-right.webp" alt="" width="117" height="42" draggable="false" style="--x:67.379%;--y:52.747%;--w:6.097%">
+        <img class="layer layer--eyelash-left" src="imgs/eyelash-left.webp" alt="" width="317" height="159" draggable="false" style="--x:40.177%;--y:40.200%;--w:16.519%">
+        <img class="layer layer--eyelash-right" src="imgs/eyelash-right.webp" alt="" width="318" height="158" draggable="false" style="--x:64.148%;--y:40.262%;--w:16.571%">
+        <img class="layer layer--glasses" src="imgs/glasses.webp" alt="" width="786" height="248" draggable="false" style="--x:38.562%;--y:40.886%;--w:40.959%">
+        <img class="layer layer--nose" src="imgs/nose.webp" alt="" width="13" height="11" draggable="false" style="--x:58.885%;--y:55.243%;--w:0.677%">
+        <img class="layer layer--mouth-closed" src="imgs/mouth-closed.webp" alt="" width="113" height="73" draggable="false" style="--x:56.071%;--y:57.990%;--w:5.888%">
+        <img class="layer layer--mouth-open" src="imgs/mouth-open.webp" alt="" width="113" height="73" draggable="false" style="--x:56.071%;--y:57.990%;--w:5.888%">
+        <img class="layer layer--eyebrows" src="imgs/eyebrows.webp" alt="" width="400" height="37" draggable="false" style="--x:50.026%;--y:37.703%;--w:20.844%">
+        <img class="layer layer--bangs" src="imgs/bangs.webp" alt="" width="997" height="826" draggable="false" style="--x:37.467%;--y:14.170%;--w:51.954%">
+
+        <button class="scene__head" type="button" aria-label="Say hi to Kate"></button>
+        <div class="bubble" role="status" aria-live="polite"><span class="bubble__text"></span></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="social">
+      <!-- TODO: replace "#" and the empty mailto with your real links. -->
+      <a href="#" aria-label="LinkedIn"><svg class="icon" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg></a>
+      <a href="#" aria-label="GitHub"><svg class="icon" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3.1-.4 6.4-1.5 6.4-7A5.4 5.4 0 0 0 20 4.8 5.1 5.1 0 0 0 19.9 1S18.7.7 16 2.5a13.4 13.4 0 0 0-7 0C6.3.7 5.1 1 5.1 1A5.1 5.1 0 0 0 5 4.8a5.4 5.4 0 0 0-1.5 3.8c0 5.4 3.3 6.6 6.4 7A3.4 3.4 0 0 0 9 18.1V22"/></svg></a>
+      <a href="mailto:" aria-label="Email"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m22 6-10 7L2 6"/></svg></a>
+    </div>
+    <small>© 2026 Katelyn Ong-iko</small>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
