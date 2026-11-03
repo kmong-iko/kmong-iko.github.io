@@ -1,8 +1,11 @@
-// Character behaviour: eye tracking, typing/idle pose, and click-to-talk.
+// Character core: eye tracking, typing/idle pose, and speaking.
+// Extra behaviour (blinking, glances, reactions, easter eggs) lives in personality.js and uses the API returned here.
 
 /* Tunables (distances are in original artwork pixels) */
 const ART_WIDTH = 1919;                                   // cropped artwork width
-const EYE_CENTER = { x: (1163 - 20) / ART_WIDTH, y: (795 - 16) / 1602 }; // between the eyes, as scene fractions
+const ART_HEIGHT = 1602;
+const EYE_CENTER = { x: (1163 - 20) / ART_WIDTH, y: (795 - 16) / ART_HEIGHT }; // between the eyes, as scene fractions
+const HEAD_CENTER = { x: 0.66, y: 0.44 };                 // as scene fractions
 const MAX_PUPIL_MOVE = { x: 26, y: 18 };                  // the pupil-cover layer clips any overshoot
 const EYE_EASING = 0.16;                                  // 0–1, higher = snappier (following the cursor)
 const EYE_RETURN_EASING = 0.07;                           // slower, so the eyes drift back to the laptop
@@ -28,6 +31,7 @@ const RANDOM_MESSAGES = [
 
 const isTouch = matchMedia('(pointer: coarse)').matches;
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const randomBetween = ([min, max]) => min + Math.random() * (max - min);
 
 export function initCharacter(scene) {
   const pupils = scene.querySelector('.layer--pupils');
@@ -35,12 +39,15 @@ export function initCharacter(scene) {
   const bubble = scene.querySelector('.bubble');
   const bubbleText = scene.querySelector('.bubble__text');
 
+  const emitMood = (mood, ms = 0) => scene.dispatchEvent(new CustomEvent('mood', { detail: { mood, ms } }));
+
   /* ---- Eye tracking ---- */
   const restingGaze = () => ({ x: -0.55 * MAX_PUPIL_MOVE.x, y: 0.5 * MAX_PUPIL_MOVE.y }); // glance at the laptop
   let current = restingGaze();
   let target = { ...current };
   let easing = EYE_EASING;
   let sceneRect, pixelScale, frame = 0;
+  let cupCenter = null; // while set, the eyes follow the cup instead of the cursor
 
   const measure = () => {
     sceneRect = scene.getBoundingClientRect();
@@ -77,7 +84,6 @@ export function initCharacter(scene) {
   };
 
   /* ---- Typing / idle pose ---- */
-  const randomBetween = ([min, max]) => min + Math.random() * (max - min);
   let typingTimer = 0, keyIsDown = true, pace = 'fast', changesLeft = 0;
 
   // Alternates the key-down / key-up body frames at randomised intervals.
@@ -100,24 +106,41 @@ export function initCharacter(scene) {
 
   let idleTimer;
   const wake = () => {
-    scene.dataset.pose = 'typing';
+    if (scene.dataset.pose !== 'typing') { scene.dataset.pose = 'typing'; emitMood('coding'); }
     startTyping();
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
+    idleTimer = setTimeout(() => { // cursor stopped: stop typing, look back at the laptop
       scene.dataset.pose = 'idle';
+      emitMood('vibing');
       stopTyping();
-      returnGazeToLaptop();
+      if (!cupCenter) returnGazeToLaptop();
     }, IDLE_DELAY_MS);
   };
 
-  const onPointer = (event) => { lookAt(event.clientX, event.clientY); wake(); };
+  const onPointer = (event) => {
+    if (!cupCenter) lookAt(event.clientX, event.clientY);
+    wake();
+  };
   addEventListener('pointermove', onPointer, { passive: true });
   addEventListener('pointerdown', onPointer, { passive: true });
-  document.addEventListener('mouseleave', returnGazeToLaptop);
+  document.addEventListener('mouseleave', () => { if (!cupCenter) returnGazeToLaptop(); });
   if (isTouch) setInterval(() => { if (!document.hidden) wake(); }, TOUCH_TYPING_INTERVAL_MS);
 
-  /* ---- Click to talk ---- */
+  /* ---- Speaking ---- */
   let hasGreeted = false, lastIndex = -1, hideTimer;
+
+  /** Opens her mouth and shows the speech bubble for `ms` (default: based on message length). */
+  const speak = (message, ms = 2200 + message.length * 40) => {
+    bubbleText.textContent = message;
+    scene.classList.add('is-talking');
+    bubble.classList.add('is-visible');
+    emitMood('chatty', ms);
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      scene.classList.remove('is-talking');
+      bubble.classList.remove('is-visible');
+    }, ms);
+  };
 
   const pickMessage = () => {
     if (!hasGreeted) { hasGreeted = true; return WELCOME_MESSAGE; }
@@ -126,21 +149,32 @@ export function initCharacter(scene) {
     lastIndex = index;
     return RANDOM_MESSAGES[index];
   };
-
-  head.addEventListener('click', () => {
-    const message = pickMessage();
-    bubbleText.textContent = message;
-    scene.classList.add('is-talking');
-    bubble.classList.add('is-visible');
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      scene.classList.remove('is-talking');
-      bubble.classList.remove('is-visible');
-    }, 2200 + message.length * 40);
-  });
+  head.addEventListener('click', () => speak(pickMessage()));
 
   new ResizeObserver(measure).observe(scene);
   addEventListener('scroll', measure, { passive: true });
   measure();
   wake();
+
+  /* ---- API for personality.js / cup.js ---- */
+  return {
+    speak,
+    emitMood,
+    isIdle: () => scene.dataset.pose === 'idle',
+    isTalking: () => scene.classList.contains('is-talking'),
+    /** Brief look at an offset gaze (artwork px), then back to the laptop. */
+    glance(gaze, holdMs) {
+      setGaze(gaze, 0.12);
+      setTimeout(() => { if (!cupCenter && scene.dataset.pose === 'idle') returnGazeToLaptop(); }, holdMs);
+    },
+    /** Follow the cup at client coords {x, y}; pass null to let go. */
+    followCup(center) {
+      const wasFollowing = Boolean(cupCenter);
+      cupCenter = center;
+      if (center) lookAt(center.x, center.y);
+      else if (wasFollowing) returnGazeToLaptop();
+    },
+    /** Head centre in client px, and the scene width (to measure distances against). */
+    headMetrics: () => ({ x: sceneRect.left + HEAD_CENTER.x * sceneRect.width, y: sceneRect.top + HEAD_CENTER.y * sceneRect.height, width: sceneRect.width }),
+  };
 }

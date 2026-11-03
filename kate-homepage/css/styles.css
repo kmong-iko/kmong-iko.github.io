@@ -1,7 +1,7 @@
 /* ==========================================================================
    Kate's homepage
-   1. Tokens & themes   2. Base   3. Header   4. Page layout
-   5. Character scene   6. Speech bubble   7. Footer   8. Motion preferences
+   1. Tokens & themes   2. Base   3. Header   4. Page layout   5. Character scene
+   6. Speech bubble   7. Footer   8. Backdrop   9. Status panel   10. Cursor effects   11. Motion preferences
    ========================================================================== */
 
 /* 1. Tokens & themes ------------------------------------------------------ */
@@ -16,6 +16,23 @@
   --bubble-ink: #4a1a08;
   --bubble-line: #7a2a12;
   --character-scale: 0.88; /* overall size of the character scene */
+
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ui-glow: rgba(255, 136, 0, 0.55);
+  --shadow: rgba(74, 26, 8, 0.55);
+  --laptop-glow: rgba(255, 205, 100, 0.6);
+  --status-accent: linear-gradient(90deg, #a95cff, #ff6ec7);
+  --status-shadow: rgba(169, 92, 255, 0.45);
+
+  /* Backdrop atmosphere — overridden per time of day by [data-period] (set in js/background.js) */
+  --glow-bottom: rgba(255, 120, 200, 0.28);
+  --glow-top: rgba(180, 120, 255, 0.18);
+  --glow-side: rgba(255, 170, 90, 0.18);
+  --glow-strength: 0.7;
+  --grid-line: rgba(170, 80, 255, 0.26);
+  --star-strength: 0.8;
+  --tint: transparent;
+  --laptop-glow-boost: 1;
   color-scheme: light;
 }
 
@@ -28,7 +45,39 @@
   --bubble-bg: #0007a3;
   --bubble-ink: #b5e5f7;
   --bubble-line: #85d5ed;
+  --ui-glow: rgba(0, 119, 255, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --status-shadow: rgba(255, 110, 199, 0.4);
   color-scheme: dark;
+}
+
+:root[data-period="dawn"] {
+  --glow-bottom: rgba(255, 150, 130, 0.34);
+  --glow-top: rgba(255, 190, 150, 0.2);
+  --glow-side: rgba(255, 200, 120, 0.2);
+  --glow-strength: 0.85;
+  --grid-line: rgba(230, 100, 170, 0.28);
+  --tint: rgba(255, 170, 140, 0.06);
+}
+:root[data-period="dusk"] {
+  --glow-bottom: rgba(255, 100, 150, 0.38);
+  --glow-top: rgba(160, 90, 255, 0.25);
+  --glow-side: rgba(255, 140, 60, 0.3);
+  --glow-strength: 1;
+  --grid-line: rgba(200, 80, 220, 0.34);
+  --star-strength: 0.8;
+  --tint: rgba(255, 110, 90, 0.05);
+  --laptop-glow-boost: 1.15;
+}
+:root[data-period="night"] {
+  --glow-bottom: rgba(170, 90, 255, 0.4);
+  --glow-top: rgba(90, 60, 200, 0.32);
+  --glow-side: rgba(255, 90, 200, 0.2);
+  --glow-strength: 0.95;
+  --grid-line: rgba(200, 110, 255, 0.4);
+  --star-strength: 1;
+  --tint: rgba(110, 70, 200, 0.07);
+  --laptop-glow-boost: 1.3;
 }
 
 /* 2. Base ----------------------------------------------------------------- */
@@ -54,10 +103,18 @@ a { color: inherit; text-decoration: none; }
 .icon { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
 
 /* 3. Header --------------------------------------------------------------- */
-/* Mobile: controls row on top (right-aligned), nav row below. */
-.site-header { display: flex; flex-direction: column; align-items: center; padding: 0.4rem 0.5rem 0; }
+/* Narrow/tablet: status + controls on one row, nav row below. Wide screens: nav centred, panels pinned to the corners. */
+.site-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "status controls" "nav nav";
+  align-items: start;
+  padding: 0.4rem 0.6rem 0;
+}
+.status { grid-area: status; justify-self: start; }
+.controls { grid-area: controls; display: flex; gap: 0.1rem; }
+.nav { grid-area: nav; display: flex; justify-content: center; }
 
-.nav { display: flex; justify-content: center; }
 .nav a {
   display: inline-flex;
   align-items: center;
@@ -69,11 +126,7 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap;
   text-decoration: underline 2px transparent;
   text-underline-offset: 0.3em;
-  transition: text-decoration-color 0.2s;
 }
-.nav a:hover { text-decoration-color: currentColor; }
-
-.controls { order: -1; align-self: flex-end; display: flex; gap: 0.1rem; }
 
 .icon-button {
   display: grid;
@@ -87,9 +140,23 @@ a { color: inherit; text-decoration: none; }
   color: var(--accent);
   cursor: pointer;
 }
-.icon-button .icon { width: 2.1rem; height: 2.1rem; stroke-width: 1.6; transition: transform 0.25s; }
-.theme-toggle:hover .icon { transform: rotate(18deg); }
-.sound-toggle:hover .icon { transform: scale(1.12); }
+.icon-button .icon { width: 2.1rem; height: 2.1rem; stroke-width: 1.6; transition: transform 0.4s var(--spring); }
+
+/* Springy hover / press feedback shared by every button-like control. */
+.nav a, .icon-button, .social a {
+  transition: transform 0.4s var(--spring), filter 0.25s, text-shadow 0.25s, text-decoration-color 0.2s;
+}
+.nav a:focus-visible { text-shadow: 0 0 12px var(--ui-glow); }
+.icon-button:focus-visible, .social a:focus-visible { filter: drop-shadow(0 0 6px var(--ui-glow)); }
+
+@media (hover: hover) {
+  .nav a:hover { transform: translateY(-2px) scale(1.06); text-decoration-color: currentColor; text-shadow: 0 0 12px var(--ui-glow); }
+  .icon-button:hover, .social a:hover { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 6px var(--ui-glow)); }
+  .theme-toggle:hover .icon { transform: rotate(18deg); }
+  .sound-toggle:hover .icon { transform: scale(1.12); }
+}
+/* After the hover rules so a press wins while hovered. */
+.nav a:active, .icon-button:active, .social a:active { transform: scale(0.92); }
 
 .theme-toggle .icon--moon,
 .sound-toggle .icon--sound-off,
@@ -98,9 +165,10 @@ a { color: inherit; text-decoration: none; }
 :root[data-theme="dark"] .theme-toggle .icon--moon,
 .sound-toggle[aria-pressed="false"] .icon--sound-off { display: block; }
 
-@media (min-width: 761px) {
-  .site-header { position: relative; flex-direction: row; justify-content: center; padding: 1rem 1rem 0; }
-  .controls { position: absolute; top: 0.75rem; right: clamp(0.5rem, 2.5vw, 2rem); order: 0; }
+@media (min-width: 961px) {
+  .site-header { position: relative; display: flex; justify-content: center; padding: 1rem 1rem 0; }
+  .status { position: absolute; top: 0.9rem; left: clamp(0.75rem, 2.5vw, 2rem); }
+  .controls { position: absolute; top: 0.75rem; right: clamp(0.5rem, 2.5vw, 2rem); }
 }
 
 /* 4. Page layout ---------------------------------------------------------- */
@@ -167,7 +235,7 @@ a { color: inherit; text-decoration: none; }
 .scene[data-pose="idle"] .layer--body-idle,
 .scene[data-key="up"] .layer--body-idle { opacity: 1; }
 
-.layer--pupils { will-change: transform; } /* moved by js/character.js */
+.layer--pupils { will-change: transform, scale; transform-origin: 50% 35%; } /* moved by js/character.js; scaled to blink */
 
 .layer--mouth-open { opacity: 0; }
 .scene.is-talking .layer--mouth-open { opacity: 1; }
@@ -184,6 +252,50 @@ a { color: inherit; text-decoration: none; }
 }
 .layer--cup.is-dragging { cursor: grabbing; }
 
+/* Faint laptop-screen glow: a halo behind the laptop plus a light film on the screen.
+   Both brighten while she is typing (data-pose="typing"). */
+.scene__glow {
+  position: absolute;
+  left: -9%;
+  top: 46%;
+  width: 66%;
+  height: 64%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--laptop-glow), transparent 72%);
+  opacity: calc(0.4 * var(--laptop-glow-boost));
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.scene[data-pose="typing"] .scene__glow { opacity: calc(0.78 * var(--laptop-glow-boost)); }
+
+.scene__screen {
+  position: absolute;
+  left: 0.6%;
+  top: 58.4%;
+  width: 42%;
+  height: 35.6%;
+  background: linear-gradient(135deg, rgba(255, 255, 235, 0.55), rgba(255, 255, 235, 0) 70%);
+  mix-blend-mode: screen;
+  opacity: 0.12;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.scene[data-pose="typing"] .scene__screen { opacity: 0.4; }
+
+/* Soft contact shadow on the floor under the cup; js/cup.js sets its transform/opacity from the cup's height. */
+.cup-shadow {
+  position: absolute;
+  left: calc(var(--x) - var(--w) * 0.06);
+  width: calc(var(--w) * 1.12);
+  top: 98.4%;
+  height: 4.2%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--shadow), transparent);
+  opacity: 0.5;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
 /* Click target over the head (the avatar). */
 .scene__head {
   position: absolute;
@@ -197,6 +309,20 @@ a { color: inherit; text-decoration: none; }
   border-radius: 48%;
   background: none;
   cursor: pointer;
+}
+
+/* Hidden easter egg: tap the pig sticker on the laptop. */
+.scene__sticker {
+  position: absolute;
+  left: 13%;
+  top: 71.5%;
+  width: 14%;
+  height: 14%;
+  z-index: 5;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: default;
 }
 
 /* 6. Speech bubble -------------------------------------------------------- */
@@ -242,11 +368,128 @@ a { color: inherit; text-decoration: none; }
 .site-footer small { padding: 0.5rem 1rem; color: var(--muted); font-size: 0.9rem; }
 
 .social { display: flex; gap: 0.5rem; }
-.social a { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; color: var(--accent); transition: transform 0.2s; }
-.social a:hover { transform: translateY(-3px); }
+.social a { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; color: var(--accent); }
 .social .icon { width: 2rem; height: 2rem; stroke-width: 2; }
 
-/* 8. Motion preferences --------------------------------------------------- */
+/* ==========================================================================
+   8. Backdrop — minimal floating pixel stars
+   ========================================================================== */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.backdrop.is-ready {
+  opacity: 1;
+}
+
+/* Floating pixel stars */
+
+.backdrop__stars {
+  position: absolute;
+  inset: 0;
+}
+
+.star {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
+  background: var(--color);
+  opacity: 0;
+  animation: star-float var(--duration) ease-in-out var(--delay) infinite alternate;
+}
+
+.star--spark {
+  background:
+    linear-gradient(var(--color), var(--color)) center / 100% 2px no-repeat,
+    linear-gradient(var(--color), var(--color)) center / 2px 100% no-repeat;
+}
+
+@keyframes star-float {
+  0% {
+    opacity: 0.08;
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    opacity: var(--peak);
+    transform: translate3d(
+      calc(var(--dx) * 0.5),
+      calc(var(--dy) * 0.5),
+      0
+    );
+  }
+
+  100% {
+    opacity: 0.08;
+    transform: translate3d(var(--dx), var(--dy), 0);
+  }
+}
+/* 9. Status panel ---------------------------------------------------------- */
+.status {
+  min-width: 10.5rem;
+  border: 2px solid var(--bubble-line);
+  background: var(--bubble-bg);
+  color: var(--bubble-ink);
+  box-shadow: 3px 3px 0 var(--status-shadow);
+  font: 500 0.7rem/1.35 ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.status__title { display: flex; justify-content: space-between; align-items: center; padding: 0.12rem 0.4rem; background: var(--status-accent); color: #fff; font-weight: 700; }
+.status__dots { display: flex; gap: 0.2rem; }
+.status__dots i { width: 0.5rem; height: 0.5rem; border: 1.5px solid #fff; }
+.status__body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 0.9rem;
+  padding: 0.3rem 0.5rem 0.35rem;
+}
+.status__body > :nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+.status__led {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+  background: #35d07f;
+  box-shadow: 0 0 6px #35d07f;
+  animation: led-blink 2.4s steps(1) infinite;
+}
+@keyframes led-blink { 0%, 80% { opacity: 1; } 90% { opacity: 0.25; } }
+.status time { grid-row: 1; grid-column: 2; font-variant-numeric: tabular-nums; }
+
+/* 10. Cursor effects (created by js/cursor-fx.js) ---------------------------- */
+.cursor-glow {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 176, 40, 0.34), rgba(255, 150, 30, 0.12) 45%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  will-change: transform;
+}
+.cursor-glow.is-visible { opacity: 1; }
+.cursor-fx { position: fixed; inset: 0; z-index: 61; width: 100%; height: 100%; pointer-events: none; }
+
+/* 11. Motion preferences --------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
+  .backdrop__grid, .status__led { animation: none; }
+  .star { animation: none; opacity: calc(0.45 * var(--star-strength)); }
 }
