@@ -15,6 +15,9 @@ const MAX_THROW_SPEED = 3500;
 const THROW_SAMPLE_MS = 100;     // window used to estimate release velocity
 const HOLD_STILL_MS = 80;        // holding still this long before release cancels the throw
 const MAX_TILT_DEG = 22;
+const SHADOW_FALLOFF = 0.55;     // × scene height: lift at which the shadow is smallest/faintest
+const SHADOW_BASE_OPACITY = 0.5;
+const AWAY_PX = 2;               // further than this from home counts as "away"
 const MIN_SOUND_SPEED = 120;     // wall/ceiling hits slower than this are silent
 const LOUDEST_IMPACT = 2200;     // impact speed that maps to full (still soft) bounce volume
 const RETURN_DELAY_MS = 250;     // short pause once settled, before gliding home
@@ -27,25 +30,38 @@ const easeInOutCubic = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2)
 /**
  * @param {HTMLElement} cup
  * @param {HTMLElement} bounds  element whose box acts as walls and ceiling
- * @param {{ onBounce?: (intensity: number) => void, onInteract?: () => void }} [hooks]
- *   onBounce gets 0–1 for every audible surface hit; onInteract fires on grab/release (lets audio unlock).
+ * @param {{ shadow?: HTMLElement, onBounce?: (intensity: number) => void, onInteract?: () => void,
+ *           onMove?: (info: { x: number, y: number, away: boolean }) => void }} [hooks]
+ *   shadow is the floor shadow element; onBounce gets 0–1 for every audible surface hit; onInteract fires on
+ *   grab/release (lets audio unlock); onMove gets the cup's centre in client px on every render.
  */
-export function initCup(cup, bounds, { onBounce, onInteract } = {}) {
-  const scene = cup.offsetParent;
-  const state = { x: 0, y: 0, vx: 0, vy: 0, angle: 0 }; // offset from the resting spot
+export function initCup(cup, bounds, { shadow, onBounce, onInteract, onMove } = {}) {
+  const scene = cup.closest('.scene');
+  const state = { x: 0, y: 0, vx: 0, vy: 0, angle: 0, impact: 0 }; // offset from the resting spot; impact squashes the shadow
   let limits = { minX: 0, maxX: 0, minY: 0 };           // maxY is always 0 (the floor)
+  let home = { x: 0, y: 0 };                            // cup centre at its resting spot, in client px
   let dragging = false, grab = { x: 0, y: 0 }, samples = [], frame = 0, lastTime = 0;
 
   const render = () => {
     cup.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) rotate(${state.angle}deg)`;
+
+    if (shadow) { // smaller and fainter the higher the cup is, spreading briefly on impact
+      const lift = clamp(-state.y / (scene.offsetHeight * SHADOW_FALLOFF), 0, 1);
+      const size = (1 - 0.5 * lift) * (1 + 0.25 * state.impact);
+      shadow.style.transform = `translate3d(${state.x}px, 0, 0) scale(${size})`;
+      shadow.style.opacity = SHADOW_BASE_OPACITY * (1 - 0.8 * lift) * (1 + 0.3 * state.impact);
+    }
+    onMove?.({ x: home.x + state.x, y: home.y + state.y, away: Math.hypot(state.x, state.y) > AWAY_PX });
   };
 
   // Walls and ceiling are the page area; measured relative to the cup's untransformed position.
   const measure = () => {
+    if (!cup.offsetParent) return; // Home view is hidden (Workfolio is showing)
     const sceneBox = scene.getBoundingClientRect();
     const area = bounds.getBoundingClientRect();
     const left = sceneBox.left + cup.offsetLeft;
     const top = sceneBox.top + cup.offsetTop;
+    home = { x: left + cup.offsetWidth / 2, y: top + cup.offsetHeight / 2 };
     limits = {
       minX: area.left - left,
       maxX: area.right - (left + cup.offsetWidth),
@@ -59,6 +75,7 @@ export function initCup(cup, bounds, { onBounce, onInteract } = {}) {
   /* ---- Return to the original spot ---- */
   const glideHome = () => {
     const from = { x: state.x, angle: state.angle };
+    state.impact = 0;
     const duration = clamp(RETURN_MIN_MS + Math.abs(from.x) * 0.4, RETURN_MIN_MS, RETURN_MAX_MS);
     const start = performance.now() + RETURN_DELAY_MS;
     const tick = (now) => {
@@ -78,6 +95,7 @@ export function initCup(cup, bounds, { onBounce, onInteract } = {}) {
     lastTime = time;
     const scale = scene.offsetWidth / REFERENCE_WIDTH;
 
+    state.impact *= Math.exp(-10 * dt);
     state.vy += GRAVITY * scale * dt;
     const drag = Math.exp(-AIR_DRAG * dt);
     state.vx *= drag;
@@ -99,6 +117,7 @@ export function initCup(cup, bounds, { onBounce, onInteract } = {}) {
       state.y = 0;
       if (impact > MIN_BOUNCE_SPEED * scale) {
         bounce(impact);
+        state.impact = clamp(impact / (LOUDEST_IMPACT * scale), 0, 1);
         state.vy = -impact * FLOOR_BOUNCE;
       } else {
         state.vy = 0;

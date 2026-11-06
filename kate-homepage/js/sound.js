@@ -1,4 +1,5 @@
-// Soft synthesized "glass clink" for cup bounces (Web Audio, no audio files) plus the on/off toggle.
+// Soft synthesized sounds (Web Audio, no audio files): the glass clink for cup bounces, the keyboard click
+// for the dev-tool keys, and the on/off toggle.
 
 const STORAGE_KEY = 'sound';
 const MIN_GAP_MS = 70;                       // never retrigger faster than this
@@ -6,6 +7,8 @@ const BASE_PITCHES = [1568, 1760, 2093];     // Hz; one is picked per hit so it 
 const PITCH_JITTER = 0.05;                   // ± random detune
 const MIN_VOLUME = 0.025;                    // gentlest tap
 const MAX_VOLUME = 0.11;                     // hardest hit — deliberately quiet
+const KEY_MIN_GAP_MS = 35;                   // keyboard clicks: never retrigger faster than this
+const KEY_VOLUME = 0.05;                     // very soft
 const PARTIALS = [                           // inharmonic overtones give the glassy ring
   { ratio: 1, gain: 1, decay: 0.3 },
   { ratio: 2.32, gain: 0.45, decay: 0.16 },
@@ -61,12 +64,50 @@ export function createSound() {
     }
   };
 
+  /** Soft mechanical key press: a short filtered-noise tick plus a low "thock". */
+  let noise = null, lastKey = 0;
+  const playKey = () => {
+    if (!enabled || !context || context.state !== 'running') return;
+    const nowMs = performance.now();
+    if (nowMs - lastKey < KEY_MIN_GAP_MS) return;
+    lastKey = nowMs;
+
+    const start = context.currentTime;
+    if (!noise) { // 30 ms of white noise, created once
+      noise = context.createBuffer(1, Math.round(context.sampleRate * 0.03), context.sampleRate);
+      const data = noise.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    }
+
+    const tick = context.createBufferSource();
+    const band = context.createBiquadFilter();
+    const tickGain = context.createGain();
+    tick.buffer = noise;
+    band.type = 'bandpass';
+    band.frequency.value = 2200 + Math.random() * 700;
+    band.Q.value = 0.9;
+    tickGain.gain.setValueAtTime(KEY_VOLUME, start);
+    tickGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.03);
+    tick.connect(band).connect(tickGain).connect(output);
+    tick.start(start);
+
+    const thock = context.createOscillator();
+    const thockGain = context.createGain();
+    thock.frequency.setValueAtTime(190, start);
+    thock.frequency.exponentialRampToValueAtTime(110, start + 0.05);
+    thockGain.gain.setValueAtTime(KEY_VOLUME * 0.9, start);
+    thockGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.07);
+    thock.connect(thockGain).connect(output);
+    thock.start(start);
+    thock.stop(start + 0.08);
+  };
+
   const setEnabled = (value) => {
     enabled = value;
     try { localStorage.setItem(STORAGE_KEY, value ? 'on' : 'off'); } catch (e) { /* storage unavailable */ }
   };
 
-  return { unlock, play, setEnabled, get enabled() { return enabled; } };
+  return { unlock, play, playKey, setEnabled, get enabled() { return enabled; } };
 }
 
 export function initSoundToggle(button, sound) {

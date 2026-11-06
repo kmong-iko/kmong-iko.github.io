@@ -1,5 +1,4 @@
-// Vaporwave backdrop: time-of-day atmosphere + sparse floating pixel stars.
-// The grid and glow are pure CSS; this module only sets the period and creates the stars.
+// Home ambient: time-of-day atmosphere (a subtle tint over the gradient, via [data-period]) + sparse floating pixel stars.
 
 const root = document.documentElement;
 const PERIOD_REFRESH_MS = 5 * 60 * 1000;
@@ -37,13 +36,13 @@ function createStars(container) {
 }
 
 export function initBackground() {
-  const backdrop = document.querySelector('.backdrop');
+  const ambient = document.querySelector('.hero-ambient');
   const applyPeriod = () => { root.dataset.period = getPeriod(); };
 
   applyPeriod();
   setInterval(applyPeriod, PERIOD_REFRESH_MS);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) applyPeriod(); });
 
-  createStars(backdrop.querySelector('.backdrop__stars'));
-  requestAnimationFrame(() => backdrop.classList.add('is-ready'));
+  createStars(ambient.querySelector('.hero-ambient__stars'));
+  requestAnimationFrame(() => ambient.classList.add('is-ready'));
 }

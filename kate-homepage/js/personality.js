@@ -28,12 +28,12 @@ const CHATTER = {
 
 const randomBetween = ([min, max]) => min + Math.random() * (max - min);
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
-const loop = (range, action) => { // repeat `action` at random intervals, skipping while the tab is hidden
-  const run = () => setTimeout(() => { if (!document.hidden) action(); run(); }, randomBetween(range));
+const loop = (range, action) => { // repeat `action` at random intervals, skipping while the tab (or the Home page) is hidden
+  const run = () => setTimeout(() => { if (!document.hidden && document.querySelector('.scene').offsetParent) action(); run(); }, randomBetween(range));
   run();
 };
 
-export function initPersonality(scene, character, fx) {
+export function initPersonality(scene, character) {
   const pupils = scene.querySelector('.layer--pupils');
 
   /* ---- Blinking: squash the pupils flat (the skin behind them reads as a closed eye) ---- */
@@ -78,7 +78,6 @@ export function initPersonality(scene, character, fx) {
       if (now - lastReaction > CUP_REACTION_COOLDOWN_MS) {
         lastReaction = now;
         character.speak(pick(CUP_LINES), 2400);
-        character.emitMood('startled', 2600);
       }
     } else if (isNear && distance > CUP_FAR) {
       isNear = false;
@@ -99,18 +98,13 @@ export function initPersonality(scene, character, fx) {
   // 1) Click her five times quickly.
   const head = scene.querySelector('.scene__head');
   head.addEventListener('click', counter(SECRET_CLICKS, SECRET_WINDOW_MS, () => {
-    const { x, y } = character.headMetrics();
     character.speak(SECRET_LINE, 4800);
-    character.emitMood('loved', 5000);
-    fx.burst(x, y - 40, 26);
   }));
 
   // 2) Tap the pig sticker on her laptop three times.
   const sticker = scene.querySelector('.scene__sticker');
   sticker.addEventListener('click', counter(STICKER_TAPS, STICKER_WINDOW_MS, () => {
-    const box = sticker.getBoundingClientRect();
     character.speak(STICKER_LINE, 5200);
-    fx.burst(box.left + box.width / 2, box.top + box.height / 2, 16);
   }));
 
   return { onCupMove };
