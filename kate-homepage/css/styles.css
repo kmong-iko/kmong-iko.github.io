@@ -403,6 +403,12 @@ ul { padding: 0; list-style: none; }
 .scene.is-talking .layer--mouth-open { opacity: 1; }
 .scene.is-talking .layer--mouth-closed { opacity: 0; }
 
+/* The laptop is the top-most layer of the scene (above the avatar, the cup and every other element).
+   Its screen-light film stays directly above it, and all layers have pointer-events: none, so clicks still reach
+   the avatar, the sticker and the cup underneath. */
+.layer--laptop { z-index: 100; }
+.scene__screen { z-index: 101; }
+
 /* Draggable cup (physics in js/cup.js). touch-action only affects touches that start on the cup. */
 .layer--cup {
   z-index: 7;
