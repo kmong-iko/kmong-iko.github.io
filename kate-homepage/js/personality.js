@@ -10,18 +10,18 @@ const CHATTER_MS = [28000, 55000];
 
 const CUP_NEAR = 0.36;           // × scene width: the cup is "close" inside this distance…
 const CUP_FAR = 0.5;             // …and "gone" beyond this one (hysteresis)
-const CUP_REACTION_COOLDOWN_MS = 6000;
+const CUP_REACTION_COOLDOWN_MS = 8000;
 
 const SECRET_CLICKS = 5, SECRET_WINDOW_MS = 3000;
 const STICKER_TAPS = 3, STICKER_WINDOW_MS = 2000;
 
 const CUP_LINES = ['Hey, careful with my coffee!', 'Is that my cup?! Mind the laptop!', 'Whoa, incoming mug!'];
-const SECRET_LINE = 'Secret unlocked: I name all my bugs. This one is Gary.';
-const STICKER_LINE = 'That’s Mochi, my debugging buddy. He’s never been wrong. He’s also never said a word.';
+const SECRET_LINE = 'Secret unlocked: I love minions, especially Bob.';
+const STICKER_LINE = 'That’s Chiikawa, my debugging buddy. It’s never been wrong. It’s also never said a word.';
 const CHATTER = {
-  any: ['Psst… try picking up my coffee.', 'Still here! Take your time.', 'Pixel by pixel, that’s how I work.', 'Go on, toss the cup. It bounces.'],
+  any: ['Psst… try picking up my coffee.', 'Still here! Take your time.', 'Pixel by pixel, that’s how I work.', 'Check my socials below and say hi!'],
   dawn: ['Early bird gets the bugs.'],
-  day: ['Good day for shipping things.'],
+  day: ['Good day for creating things.'],
   dusk: ['Golden hour. Best lighting there is.'],
   night: ['It’s getting late… one more commit.'],
 };
