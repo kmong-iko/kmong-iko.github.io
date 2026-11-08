@@ -1,2 +1,3 @@
-# kmong-iko.com
+kmong-iko.github.io
+
 my portfolio.
