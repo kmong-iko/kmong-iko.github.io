@@ -1,13 +1,14 @@
-// Tiny hash router for the two pages. The header and footer never re-render, so their colours
+// Tiny hash router for the three pages (Home and Contact share the same character scene; Workfolio is separate). The header and footer never re-render, so their colours
 // can transition smoothly while the content swaps (display is driven by html[data-page] in CSS).
 
 const PAGES = {
   home: { title: 'Kae — UI/UX Designer, Illustrator, Developer' },
   workfolio: { title: 'Workfolio — Kae' },
+  contact: { title: 'Contact — Kae' },
 };
 
 const root = document.documentElement;
-const pageFromHash = () => (location.hash === '#workfolio' ? 'workfolio' : 'home');
+const pageFromHash = () => (location.hash === '#workfolio' ? 'workfolio' : location.hash === '#contact' ? 'contact' : 'home');
 
 export function initRouter() {
   const links = [...document.querySelectorAll('[data-route]')];
@@ -20,7 +21,15 @@ export function initRouter() {
       else link.removeAttribute('aria-current');
     });
     if (scroll) window.scrollTo(0, 0);
+    // The character slides sideways between Home and Contact: keep eye tracking & cup bounds in step while it moves.
+    if (previous !== page && (previous === 'contact' || page === 'contact') && previous !== null) {
+      const until = performance.now() + 1400;
+      const follow = () => { dispatchEvent(new Event('scroll')); if (performance.now() < until) requestAnimationFrame(follow); };
+      requestAnimationFrame(follow);
+    }
+    previous = page;
   };
+  let previous = null;
 
   addEventListener('hashchange', () => show(pageFromHash(), { scroll: true }));
   show(pageFromHash(), { scroll: false });
