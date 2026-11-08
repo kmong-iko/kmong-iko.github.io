@@ -4,7 +4,7 @@
 
 const hasMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const FOLLOW = 0.11;        // 0–1 per frame at 60 fps: lower = lazier, floatier trail (frame-rate independent below)
+const FOLLOW = 0.22;        // 0–1 per frame at 60 fps: lower = lazier, floatier trail (frame-rate independent below)
 const SETTLE_PX = 0.15;     // stop animating once this close
 
 export function initCursorGlow() {

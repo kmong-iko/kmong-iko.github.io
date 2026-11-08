@@ -15,6 +15,7 @@ import { initAbout } from './about.js';
 import { initContact } from './contact.js';
 import { initSfx } from './sfx.js';
 import { initLoader } from './loader.js';
+import { initMobileToast } from './toast.js';
 
 const sound = createSound();
 
@@ -50,4 +51,4 @@ initCup(document.querySelector('.layer--cup'), document.querySelector('.view--ho
 ['pointerdown', 'keydown'].forEach((type) => addEventListener(type, () => sound.unlock(), { once: true, passive: true }));
 
 
-initLoader(); // fade the loading screen away once the artwork is ready
+initLoader().then(() => initMobileToast()); // fade the loading screen away once the artwork is ready, then (phones only) the desktop tip
