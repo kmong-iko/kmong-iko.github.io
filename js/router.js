@@ -2,9 +2,9 @@
 // can transition smoothly while the content swaps (display is driven by html[data-page] in CSS).
 
 const PAGES = {
-  home: { title: 'Kae — UI/UX Designer, Illustrator, Developer' },
-  workfolio: { title: 'Workfolio — Kae' },
-  contact: { title: 'Contact — Kae' },
+  home: { title: 'kae's tambayan' },
+  workfolio: { title: 'kae's workfolio' },
+  contact: { title: 'kae's contact' },
 };
 
 const root = document.documentElement;
