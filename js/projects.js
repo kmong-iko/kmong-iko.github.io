@@ -90,7 +90,7 @@ function buildProjectContent(project) {
     ...(project.categories ?? []).map((c, i) => `<li class="tag" style="--tag:${categoryColor(c, i)}">${escapeHtml(c)}</li>`),
   ].join('');
   const list = (items) => (items?.length ? `<ul class="proj__list">${items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</ul>` : '');
-  const links = [linkHtml('Live Demo', project.links?.liveDemo), linkHtml('GitHub', project.links?.github), linkHtml('Case Study', project.links?.caseStudy)].filter(Boolean);
+  const links = [linkHtml('Live Demo', project.links?.liveDemo), linkHtml('GitHub', project.links?.github), linkHtml('Figma', project.links?.figma), linkHtml('Case Study', project.links?.caseStudy)].filter(Boolean);
 
   wrap.innerHTML = `
     <div class="proj__gallery" role="group" aria-roledescription="carousel" aria-label="${escapeHtml(project.title)} images">

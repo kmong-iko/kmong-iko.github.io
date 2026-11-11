@@ -29,7 +29,7 @@
 //    overview      the paragraph(s) in the popup under "Overview" (use \n\n between paragraphs)
 //    contributions list of bullet points under "My Contributions"
 //    technologies  list of names under "Tools & Technologies"
-//    links         { liveDemo, github, caseStudy }  — full URLs starting with https://  ('' hides that button)
+//    links         { liveDemo, github, figma, caseStudy }  — full URLs starting with https://  ('' hides that button)
 //    accent        card colour used when there is no image: 'sun' | 'bloom' | 'dusk'
 // ============================================================================
 
@@ -50,7 +50,7 @@ export const PROJECTS = [
     'Implemented responsive layouts, light and dark modes, and interactive sound effects',
     ],
     technologies: ['HTML5', 'CSS3', 'JavaScript', 'Procreate', 'Figma', "Claude AI"],
-    links: { liveDemo: 'https://www.figma.com/design/8WMe3PSDxeeRReThQnOq5Q/Kae-s-Mini-Portfolio?node-id=0-1&t=cfrXU19QKFLLIQDq-1', github: '', caseStudy: '' },
+    links: { liveDemo: '', github: '', figma: 'https://www.figma.com/design/8WMe3PSDxeeRReThQnOq5Q/Kae-s-Mini-Portfolio?node-id=0-1&t=cfrXU19QKFLLIQDq-1', caseStudy: '' }, 
     images: [
       // { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
     ],
@@ -81,6 +81,9 @@ export const PROJECTS = [
       'Progressive Web App',
       'Figma',
     ],
+    links: { liveDemo: '', github: '', figma: '', caseStudy: '' }, 
+    images: [],
+    accent: 'dusk',
   },
   {
     id: 'ez-pz-study-web-app',
