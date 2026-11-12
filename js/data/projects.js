@@ -81,7 +81,7 @@ export const PROJECTS = [
       'Progressive Web App',
       'Figma',
     ],
-    links: { liveDemo: '', github: '', figma: '', caseStudy: '' }, 
+    links: { liveDemo: '', github: 'https://github.com/yawnydoki/artifact-nmfa', figma: 'https://www.figma.com/design/wAg74EDF5ouAWWJCFdIe8E/ArtiFact-NMFA?node-id=0-1&t=7BIFnK84jwQ9CRpb-1', caseStudy: 'https://drive.google.com/file/d/1Hygem8Bkc2pKlWbbByUdJqwsRfzP5MFN/view?usp=sharing' }, 
     images: [],
     accent: 'dusk',
   },
