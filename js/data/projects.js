@@ -53,6 +53,8 @@ export const PROJECTS = [
     links: { liveDemo: '', github: '', figma: 'https://www.figma.com/design/8WMe3PSDxeeRReThQnOq5Q/Kae-s-Mini-Portfolio?node-id=0-1&t=cfrXU19QKFLLIQDq-1', caseStudy: '' }, 
     images: [
       // { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
+      { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
+      { src: 'imgs/projects/interactive-portfolio/contact.webp', alt: 'Portfolio contact page' },
     ],
     accent: 'sun',
   },
@@ -82,7 +84,9 @@ export const PROJECTS = [
       'Figma',
     ],
     links: { liveDemo: '', github: 'https://github.com/yawnydoki/artifact-nmfa', figma: 'https://www.figma.com/design/wAg74EDF5ouAWWJCFdIe8E/ArtiFact-NMFA?node-id=0-1&t=7BIFnK84jwQ9CRpb-1', caseStudy: 'https://drive.google.com/file/d/1Hygem8Bkc2pKlWbbByUdJqwsRfzP5MFN/view?usp=sharing' }, 
-    images: [],
+    images: [
+      { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact home page' },
+    ],
     accent: 'dusk',
   },
   {
