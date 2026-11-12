@@ -11,7 +11,10 @@
 // ============================================================================
 
 export const CERTIFICATES = [
-  { name: 'Certificate Name 1 (placeholder)', issuer: 'Issuer', date: 'Month YYYY', url: '' },
-  { name: 'Certificate Name 2 (placeholder)', issuer: 'Issuer', date: 'Month YYYY', url: '' },
-  { name: 'Certificate Name 3 (placeholder)', issuer: 'Issuer', date: 'Month YYYY', url: '' },
+  { name: 'IT Specialist Certificate - Java', issuer: 'certiport', date: 'November 2024', url: 'https://drive.google.com/file/d/1OtNu5egovRcYo75c7egeJcmbsK7-89H_/view?usp=sharing' },
+  { name: 'IT Specialist Certificate - Python', issuer: 'certiport', date: 'June 2025', url: 'https://drive.google.com/file/d/166fYccRZBhTXJOhpbkqpyS2ejIsOTjCi/view?usp=sharing' },
+  { name: 'Design Thinking: Certificate of Excellence', issuer: 'Far Eastern University Alabang', date: 'March 2025', url: 'https://drive.google.com/file/d/1yK6zt9J9kyzixJzaqC06Ghkhph_bDxJR/view?usp=sharing' },
+  { name: 'Technopreneurship: Certificate of Excellence', issuer: 'Far Eastern University Alabang', date: 'July 2025', url: 'https://drive.google.com/file/d/1l1nZDX-CX7Qu80e9c8Qvn9m0u36RWpHy/view?usp=sharing' },
+  { name: 'Cybersecurity Essentials Certificate', issuer: 'Cisco Networking Academy', date: 'July 2026', url: 'https://drive.google.com/file/d/10Q-rMz0G-hB2uSgI2koUTFC1g3dh5U6T/view?usp=sharing' },
+  { name: 'TOPCIT Certificate - Level 4', issuer: 'The Ministry of Science and ICT, Republic of Korea ', date: 'July 2026', url: 'https://drive.google.com/file/d/10Q-rMz0G-hB2uSgI2koUTFC1g3dh5U6T/view?usp=sharing' },
 ];
