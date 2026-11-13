@@ -29,6 +29,9 @@
 //    overview      the paragraph(s) in the popup under "Overview" (use \n\n between paragraphs)
 //    contributions list of bullet points under "My Contributions"
 //    technologies  list of names under "Tools & Technologies"
+//    videoUrl      OPTIONAL. A Google Drive share link to a video, e.g. 'https://drive.google.com/file/d/<ID>/view?usp=sharing'
+//                  (the file must be shared as "Anyone with the link can view"). Adds an Image / Video toggle in the popup.
+//                  Leave it '' (or delete the line) and the popup stays image-only with no Video button.
 //    links         { liveDemo, github, figma, caseStudy }  — full URLs starting with https://  ('' hides that button)
 //    accent        card colour used when there is no image: 'sun' | 'bloom' | 'dusk'
 // ============================================================================
@@ -51,6 +54,7 @@ export const PROJECTS = [
     ],
     technologies: ['HTML5', 'CSS3', 'JavaScript', 'Procreate', 'Figma', "Claude AI"],
     links: { liveDemo: '', github: '', figma: 'https://www.figma.com/design/8WMe3PSDxeeRReThQnOq5Q/Kae-s-Mini-Portfolio?node-id=0-1&t=cfrXU19QKFLLIQDq-1', caseStudy: '' }, 
+    videoUrl: '',
     images: [
       // { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
       { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
@@ -84,6 +88,7 @@ export const PROJECTS = [
       'Figma',
     ],
     links: { liveDemo: '', github: 'https://github.com/yawnydoki/artifact-nmfa', figma: 'https://www.figma.com/design/wAg74EDF5ouAWWJCFdIe8E/ArtiFact-NMFA?node-id=0-1&t=7BIFnK84jwQ9CRpb-1', caseStudy: 'https://drive.google.com/file/d/1Hygem8Bkc2pKlWbbByUdJqwsRfzP5MFN/view?usp=sharing' }, 
+    videoUrl: '',
     images: [
       { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact home page' },
     ],
@@ -104,6 +109,7 @@ export const PROJECTS = [
     'Built the application as a responsive Progressive Web App (PWA)',],
     technologies: ['Figma', 'HTML5', 'CSS3', 'JavaScript', 'Supabase', "Vercel", "Claude AI", "ChatGPT"],
     links: { liveDemo: '', github: '', caseStudy: '' },
+    videoUrl: '',
     images: [],
     accent: 'dusk',
   },
