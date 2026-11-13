@@ -15,8 +15,9 @@
 //           { src: 'imgs/projects/my-new-app/cover.webp',  alt: 'Home screen of My New App' },
 //           { src: 'imgs/projects/my-new-app/screen-2.webp', alt: 'Settings page' },
 //         ],
-//    3. The FIRST image is used as the card thumbnail and the first slide in the popup.
-//       Add as many as you like: the popup gets arrows + dots and fades between them.
+//    3. The FIRST image is the cover: it is used as the card thumbnail (and the hover preview) only.
+//       The images AFTER it are what the popup gallery shows (a project with just one image shows that one).
+//       Add as many as you like: the popup fades between them with dots, plus arrows (or swipe, for phone-style portrait shots).
 //    Tip: .webp or .jpg around 1600px wide keeps the page fast. With no images, a soft grey placeholder is shown.
 //
 //  FIELD GUIDE
@@ -56,9 +57,8 @@ export const PROJECTS = [
     links: { liveDemo: '', github: '', figma: 'https://www.figma.com/design/8WMe3PSDxeeRReThQnOq5Q/Kae-s-Mini-Portfolio?node-id=0-1&t=cfrXU19QKFLLIQDq-1', caseStudy: '' }, 
     videoUrl: '',
     images: [
-      // { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
       { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
-      { src: 'imgs/projects/interactive-portfolio/contact.webp', alt: 'Portfolio contact page' },
+      { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
     ],
     accent: 'sun',
   },
@@ -90,7 +90,7 @@ export const PROJECTS = [
     links: { liveDemo: '', github: 'https://github.com/yawnydoki/artifact-nmfa', figma: 'https://www.figma.com/design/wAg74EDF5ouAWWJCFdIe8E/ArtiFact-NMFA?node-id=0-1&t=7BIFnK84jwQ9CRpb-1', caseStudy: 'https://drive.google.com/file/d/1Hygem8Bkc2pKlWbbByUdJqwsRfzP5MFN/view?usp=sharing' }, 
     videoUrl: '',
     images: [
-      { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact home page' },
+      { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact AR system home page' },
     ],
     accent: 'dusk',
   },
