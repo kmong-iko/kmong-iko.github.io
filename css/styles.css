@@ -22,7 +22,6 @@
   --surface: #ffffff;     /* Workfolio page + footer */
   --grad-1: #ffffff; --grad-2: #fffee2; --grad-3: #fffdc5; --grad-4: #fffcab; --grad-5: #ffe483; --grad-6: #ffcd62;
   --rule: #ffc37f;
-  --tile: #e6e6e6;        /* creative-tool tiles stay light in both themes, like images */
 
   /* Glass pill, keyboard keys */
   --pill-bg: rgba(255, 255, 255, 0.38);
@@ -646,7 +645,7 @@ ul { padding: 0; list-style: none; }
 
 /* Creative tools: logos only */
 .tiles { display: flex; gap: 0.45rem; }
-.tile { display: grid; place-items: center; width: clamp(2.6rem, 3.8vw, 3.4rem); aspect-ratio: 1; border-radius: 0.4rem; background: var(--tile); transition: transform 0.4s var(--spring); }
+.tile { display: grid; place-items: center; width: clamp(2.6rem, 3.8vw, 3.4rem); aspect-ratio: 1; border-radius: 0.4rem; background: transparent; transition: transform 0.4s var(--spring); }
 .tile img { width: 62%; height: 62%; object-fit: contain; }
 @media (hover: hover) { .tile:hover { transform: translateY(-3px) scale(1.06); } }
 
@@ -1019,11 +1018,35 @@ button.proj__link { border: 0; font-family: inherit; cursor: pointer; }
 .proj__toggle-btn:active { transform: scale(0.95); }
 @media (pointer: coarse) { .proj__toggle-btn { padding: 0.45rem 1rem; } }
 
+
+/* Expandable details: the text area gets more room by shrinking the media viewer to a compact strip. The header (title, media
+   buttons, tags) and the viewer stay in the layout, so nothing is covered; the details just scroll inside the space left. */
+.proj__bar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: flex-end; padding: 0.45rem 0 0.2rem; background: var(--win-bg); }
+.proj__expand { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.75rem; border: 1px solid color-mix(in srgb, var(--win-ink) 16%, transparent); border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--win-ink) 78%, transparent); font: inherit; font-size: 0.82rem; font-weight: 600; line-height: 1.4; cursor: pointer; transition: transform 0.3s var(--spring), color 0.2s, border-color 0.2s; }
+.proj__expand .icon { width: 1rem; height: 1rem; stroke-width: 2.2; }
+@media (hover: hover) { .proj__expand:hover { transform: translateY(-1px); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); } }
+.proj__expand:active { transform: scale(0.95); }
+@media (pointer: coarse) { .proj__expand { padding: 0.4rem 0.95rem; } }
+.proj.is-expanded .proj__gallery,
+.proj.is-expanded .proj__gallery[data-orient='portrait'],
+.proj.is-expanded .proj__gallery.is-video { flex-basis: clamp(6.5rem, 18%, 9rem); min-height: 6.5rem; --cap-h: 0rem; }
+.proj.is-expanded .proj__caption { display: none; }
+.proj.is-expanded .proj__info { font-size: 1.04rem; line-height: 1.65; }
+@media (prefers-reduced-motion: reduce) { .proj__expand { transition: none; } }
+
 /* Video viewer: fills the same box as the image gallery */
 .proj__gallery.is-video .proj__frames, .proj__gallery.is-video .proj__placeholder, .proj__gallery.is-video .proj__nav, .proj__gallery.is-video .proj__dots, .proj__gallery.is-video .proj__zoom { visibility: hidden; }
-.proj__video { position: absolute; inset: 0; z-index: 3; background: color-mix(in srgb, var(--win-ink) 4%, transparent); }
+.proj__video { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; overflow: hidden; background: color-mix(in srgb, var(--win-ink) 4%, transparent); }
 .proj__video[hidden] { display: none; }
-.proj__video-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity 0.3s ease; }
+.proj__video-frame { display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; border: 0; opacity: 0; transition: opacity 0.3s ease; }
+/* The player always keeps its 16:9 shape and is scaled to the largest size that fits the viewer (no overflow, no stretching) */
+@supports (width: 1cqw) {
+  .proj__video-frame { width: min(100cqw, calc(100cqh * 16 / 9)); height: auto; aspect-ratio: 16 / 9; }
+}
+.proj__video-frame { grid-area: 1 / 1; }
+@media (max-width: 640px) { /* phones: give the video a 16:9 viewer so it is not squeezed into a short strip */
+  .proj__gallery.is-video { flex-basis: min(calc(56.25vw - 0.5rem), 60%); }
+}
 .proj__video.is-loaded .proj__video-frame { opacity: 1; }
 .proj__video-status { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.5rem; padding: 1rem; overflow: auto; text-align: center; font-size: 0.9rem; font-weight: 500; line-height: 1.4; color: var(--win-ink); }
 .proj__video-status .proj__links { justify-content: center; margin-top: 0.3rem; }
@@ -1066,6 +1089,7 @@ button.proj__link { border: 0; font-family: inherit; cursor: pointer; }
 .card__peek p { font-size: 0.85rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .card__techs { display: flex; flex-wrap: wrap; gap: 0.25rem; }
 .card__techs li { padding: 0.05rem 0.5rem; border-radius: 0.3rem; background: var(--key-face); color: #3b2a1a; font-size: 0.7rem; font-weight: 500; }
+:root[data-theme="dark"] .card__techs li { color: #fff; } /* dark chip face: white text for readability */
 .card__cta { display: inline-flex; align-items: center; gap: 0.3rem; color: #a33100; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
 .card__cta .icon { width: 0.95rem; height: 0.95rem; stroke-width: 2.2; transition: transform 0.3s var(--spring); }
 .card:focus-visible .card__peek { max-height: 10rem; opacity: 1; }

@@ -14,7 +14,7 @@ export function initSfx(sound) {
     if (target.closest('.carousel__arrow')) { sound.sfx('slide'); return; }
     if (target.closest('.social a, .tile')) { sound.sfx('click'); return; }
     if (target.closest('.certs__name')) { sound.sfx('click'); return; }
-    if (target.closest('.note__send, .proj__link, .note__again')) { sound.sfx('click'); }
+    if (target.closest('.note__send, .proj__link, .proj__expand, .note__again')) { sound.sfx('click'); }
   });
 
   if (!hoverable) return;

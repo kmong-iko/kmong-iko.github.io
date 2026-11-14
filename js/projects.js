@@ -21,6 +21,8 @@ const CODE_ICON = '<svg class="icon" viewBox="0 0 24 24"><path d="m9 8-4 4 4 4M1
 
 const IMAGE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.5"/><path d="m4 17 5-4.5 3.5 3L16 12l4 4.5"/></svg>';
 const ZOOM_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5M10.5 8.2v4.6M8.2 10.5h4.6"/></svg>';
+const EXPAND_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
+const COLLAPSE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7"/></svg>';
 const CLOSE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 const VIDEO_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5z"/></svg>';
 
@@ -172,6 +174,7 @@ function buildProjectContent(project) {
       <ul class="proj__tags">${tags}</ul>
     </header>
     <div class="proj__info" tabindex="0">
+      <div class="proj__bar"><button class="proj__expand" type="button" aria-expanded="false" aria-label="Expand details">${EXPAND_ICON}<span>Expand</span></button></div>
       ${project.overview ? `<section><h3>Overview</h3>${paragraphs(project.overview).map((p) => `<p>${escapeHtml(p)}</p>`).join('')}</section>` : ''}
       ${project.contributions?.length ? `<section><h3>My Contributions</h3>${list(project.contributions)}</section>` : ''}
       ${people ? `<section class="proj__developed"><h3>Developed By</h3><ul class="proj__people">${people}</ul></section>` : ''}
@@ -179,6 +182,16 @@ function buildProjectContent(project) {
       ${links.length ? `<section><h3>Project Links</h3><div class="proj__links">${links.join('')}</div></section>` : ''}
       ${rights ? `<section class="proj__rights"><h3>All Rights Reserved</h3><p>${escapeHtml(rights)}</p></section>` : ''}
     </div>`;
+
+  /* Expand / collapse the details: the media viewer shrinks to a compact strip (CSS) so the text gets the room. */
+  const expandBtn = wrap.querySelector('.proj__expand');
+  expandBtn.addEventListener('click', () => {
+    const open = wrap.classList.toggle('is-expanded');
+    expandBtn.setAttribute('aria-expanded', String(open));
+    expandBtn.setAttribute('aria-label', open ? 'Collapse details' : 'Expand details');
+    expandBtn.innerHTML = `${open ? COLLAPSE_ICON : EXPAND_ICON}<span>${open ? 'Collapse' : 'Expand'}</span>`;
+    wrap.dispatchEvent(new CustomEvent('gallery-change', { bubbles: true }));
+  });
 
   /* Gallery: stacked slides that cross-fade (opacity only, so switching never jumps). */
   const gallery = wrap.querySelector('.proj__gallery');
