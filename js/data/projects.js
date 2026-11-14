@@ -58,7 +58,7 @@ export const PROJECTS = [
     videoUrl: '',
     images: [
       { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
-      { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Portfolio home page' },
+      { src: 'imgs/projects/interactive-portfolio/cover.webp', alt: 'Home Page' },
     ],
     accent: 'sun',
   },
@@ -91,6 +91,13 @@ export const PROJECTS = [
     videoUrl: '',
     images: [
       { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact AR system home page' },
+      { src: 'imgs/projects/artifact-ar-system/Introduction.webp', alt: 'Home Page' },
+      { src: 'imgs/projects/artifact-ar-system/scanned-painting.webp', alt: 'AR Experience' },
+      { src: 'imgs/projects/artifact-ar-system/quiz.webp', alt: 'Quiz' },
+      { src: 'imgs/projects/artifact-ar-system/puzzle.webp', alt: 'Puzzle' },
+      { src: 'imgs/projects/artifact-ar-system/map.webp', alt: 'Map' },
+      { src: 'imgs/projects/artifact-ar-system/passport.webp', alt: 'Passport' },
+      { src: 'imgs/projects/artifact-ar-system/certification.webp', alt: 'Certificate' },
     ],
     accent: 'dusk',
   },
