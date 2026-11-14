@@ -38,6 +38,8 @@
 // ============================================================================
 
 export const PROJECTS = [
+
+// PORTFOLIO
   {
     id: 'interactive-portfolio',
     title: 'Interactive Portfolio',
@@ -62,6 +64,8 @@ export const PROJECTS = [
     ],
     accent: 'sun',
   },
+
+  // ARTIFACT
   {
     id: 'artifact-ar-system',
     title: 'ArtiFact: Museum AR Experience',
@@ -74,21 +78,17 @@ export const PROJECTS = [
       'The system also features multilingual content, interactive quizzes, puzzles, a digital passport, and certificates to encourage engaging museum exploration. Developed as a mobile-friendly Progressive Web App (PWA), it provides visitors with an accessible and interactive learning experience.',
     contributions: [
       'Led project coordination, team communication, task delegation, and deliverables',
-      'Designed the application UI/UX and interactive user flows',
+      'Conceptualized and designed the application UI/UX and interactive user flows',
+      'Created original illustrations for the application logo and award badges',
       'Organized and managed application data using Supabase',
       'Analyzed system testing results and user feedback using Microsoft Excel',
     ],
     technologies: [
-      'Augmented Reality',
-      'Homography',
-      'ORB',
-      'RANSAC',
-      'Supabase',
-      'Progressive Web App',
-      'Figma',
+      'Augmented Reality', 'Homography','ORB','RANSAC','Supabase','Progressive Web App','Figma',
+      'Procreate','HTML5','CSS3','JavaScript',
     ],
     links: { liveDemo: '', github: 'https://github.com/yawnydoki/artifact-nmfa', figma: 'https://www.figma.com/design/wAg74EDF5ouAWWJCFdIe8E/ArtiFact-NMFA?node-id=0-1&t=7BIFnK84jwQ9CRpb-1', caseStudy: 'https://drive.google.com/file/d/1Hygem8Bkc2pKlWbbByUdJqwsRfzP5MFN/view?usp=sharing' }, 
-    videoUrl: '',
+    videoUrl: 'https://drive.google.com/file/d/1tRxxp5_PptgJsw_Qk13onUL7MoCEEoXe/view?usp=sharing',
     images: [
       { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact AR system home page' },
       { src: 'imgs/projects/artifact-ar-system/Introduction.webp', alt: 'Home Page' },
@@ -101,6 +101,8 @@ export const PROJECTS = [
     ],
     accent: 'dusk',
   },
+
+  //EZPZ
   {
     id: 'ez-pz-study-web-app',
     title: 'EzPz: Study Web App',
