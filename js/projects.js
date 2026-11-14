@@ -103,6 +103,26 @@ const linkHtml = (label, url) => url
   ? `<a class="proj__link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`
   : '';
 
+/* Default text for the "All Rights Reserved" section. Override it per project with a `rights` field in js/data/projects.js
+   (set `rights: ''` to hide the section for that project). */
+const RIGHTS_DEFAULT = 'All images, designs, and content shown here belong to their respective creators and may not be reused without permission.';
+
+/* Only plain web links become hyperlinks (so a typo or a "javascript:" value can never run code). */
+const safeUrl = (raw) => {
+  try { const url = new URL(String(raw ?? '').trim()); return /^https?:$/.test(url.protocol) ? url.href : ''; } catch { return ''; }
+};
+
+/* "Developed By": each entry is either a plain name ('Kae') or { name, url }. A name with a valid url becomes a link to
+   that person's profile or website; a name without one is shown as normal text. */
+const peopleHtml = (people) => (people ?? [])
+  .map((person) => (typeof person === 'string' ? { name: person } : person))
+  .filter((person) => person?.name?.trim())
+  .map((person) => {
+    const name = escapeHtml(person.name.trim());
+    const url = safeUrl(person.url);
+    return `<li>${url ? `<a class="proj__person" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${name}</a>` : name}</li>`;
+  }).join('');
+
 function buildProjectContent(project) {
   const wrap = document.createElement('div');
   wrap.className = 'proj';
@@ -118,6 +138,8 @@ function buildProjectContent(project) {
     ...(project.categories ?? []).map((c, i) => `<li class="tag" style="--tag:${categoryColor(c, i)}">${escapeHtml(c)}</li>`),
   ].join('');
   const list = (items) => (items?.length ? `<ul class="proj__list">${items.map((i) => `<li>${escapeHtml(i)}</li>`).join('')}</ul>` : '');
+  const people = peopleHtml(project.developedBy);
+  const rights = project.rights === undefined ? RIGHTS_DEFAULT : String(project.rights ?? '').trim(); // '' hides the section
   const links = [linkHtml('Live Demo', project.links?.liveDemo), linkHtml('GitHub', project.links?.github), linkHtml('Figma', project.links?.figma), linkHtml('Case Study', project.links?.caseStudy)].filter(Boolean);
 
   wrap.innerHTML = `
@@ -152,8 +174,10 @@ function buildProjectContent(project) {
     <div class="proj__info" tabindex="0">
       ${project.overview ? `<section><h3>Overview</h3>${paragraphs(project.overview).map((p) => `<p>${escapeHtml(p)}</p>`).join('')}</section>` : ''}
       ${project.contributions?.length ? `<section><h3>My Contributions</h3>${list(project.contributions)}</section>` : ''}
+      ${people ? `<section class="proj__developed"><h3>Developed By</h3><ul class="proj__people">${people}</ul></section>` : ''}
       ${project.technologies?.length ? `<section><h3>Tools &amp; Technologies</h3><ul class="proj__chips">${project.technologies.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul></section>` : ''}
       ${links.length ? `<section><h3>Project Links</h3><div class="proj__links">${links.join('')}</div></section>` : ''}
+      ${rights ? `<section class="proj__rights"><h3>All Rights Reserved</h3><p>${escapeHtml(rights)}</p></section>` : ''}
     </div>`;
 
   /* Gallery: stacked slides that cross-fade (opacity only, so switching never jumps). */
@@ -320,7 +344,7 @@ function buildProjectContent(project) {
       loadTimer = setTimeout(showError, VIDEO_TIMEOUT_MS);
     }
 
-    /* A cross-origin iframe swallows pointer events, which would break dragging/resizing the window over it:
+    /* A cross-origin iframe swallows pointer events, which would break resizing the window over it:
        while the pointer is down anywhere in the window, let events pass through the iframe. */
     const guardWindowPointer = () => {
       const win = wrap.closest('.win');

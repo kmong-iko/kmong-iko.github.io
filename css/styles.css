@@ -904,9 +904,7 @@ html.has-window, html.is-loading { overflow: hidden; }
 .win.is-fullscreen .win__body { border-radius: 0; }
 .win.is-dragging { user-select: none; -webkit-user-select: none; }
 
-.win__bar { position: relative; flex: none; display: flex; align-items: center; height: 2.2rem; padding: 0 0.8rem; border-radius: 14px 14px 0 0; background: var(--accent); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
-.win.is-dragging .win__bar { cursor: grabbing; }
-.win.is-fullscreen .win__bar { cursor: default; }
+.win__bar { position: relative; flex: none; display: flex; align-items: center; height: 2.2rem; padding: 0 0.8rem; border-radius: 14px 14px 0 0; background: var(--accent); cursor: default; user-select: none; -webkit-user-select: none; }
 .win__controls { display: flex; gap: 0.5rem; }
 .win__btn { position: relative; display: grid; place-items: center; width: 0.95rem; height: 0.95rem; padding: 0; border: 0; border-radius: 50%; cursor: pointer; transition: transform 0.2s var(--spring), filter 0.2s; }
 .win__btn::after { content: ""; position: absolute; inset: -0.3rem; } /* bigger invisible hit area */
@@ -1002,6 +1000,13 @@ html.has-window, html.is-loading { overflow: hidden; }
 .proj__link .icon { width: 1rem; height: 1rem; stroke-width: 2.2; }
 @media (hover: hover) { .proj__link:hover { transform: translateY(-2px); filter: brightness(1.07); } }
 .proj__link:active { transform: scale(0.96); }
+.proj__people { display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; }
+.proj__people li:not(:last-child)::after { content: ","; }
+.proj__person { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; transition: filter 0.2s; }
+@media (hover: hover) { .proj__person:hover { filter: brightness(1.15); text-decoration-thickness: 2px; } }
+.proj__rights { margin-top: 1.4rem; padding-top: 0.9rem; border-top: 1px solid color-mix(in srgb, var(--win-ink) 12%, transparent); }
+.proj__rights h3 { font-size: 0.85rem; opacity: 0.8; }
+.proj__rights p { font-size: 0.85rem; opacity: 0.7; }
 button.proj__link { border: 0; font-family: inherit; cursor: pointer; }
 
 /* Image / Video toggle (rendered only for projects with a valid Google Drive videoUrl) */

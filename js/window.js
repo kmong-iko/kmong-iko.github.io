@@ -1,7 +1,7 @@
 // macOS-style popup windows (used by "More about me?" and the project viewer).
 //   • orange title bar with a red close button and a green full-screen button (there is NO minimize button)
-//   • drag by the title bar, resize from any edge or corner, double-click the bar (or press green) to go
-//     full-screen and again to restore the previous size/position
+//   • the window is static (it opens centered and cannot be dragged); resize from any edge or corner,
+//     double-click the bar (or press green) to go full-screen and again to restore the previous size/position
 //   • Esc or a click on the dimmed backdrop closes the top-most window; focus returns to whatever opened it
 //   • works with mouse, touch and pen (pointer events)
 
@@ -107,7 +107,7 @@ export function openWindow({ label, className = '', content, width = 880, height
   zoomButton.addEventListener('click', () => setFullscreen(!restoreRect));
   bar.addEventListener('dblclick', (event) => { if (!event.target.closest('.win__btn')) setFullscreen(!restoreRect); });
 
-  /* ---------- drag + resize ---------- */
+  /* ---------- resize (the window itself is static: no dragging) ---------- */
   const startGesture = (event, edge) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     if (restoreRect) return; // full-screen windows stay put
@@ -121,17 +121,13 @@ export function openWindow({ label, className = '', content, width = 880, height
     const move = (e) => {
       const dx = e.clientX - start.x, dy = e.clientY - start.y;
       const { w, h } = viewport();
-      if (!edge) { // move
-        rect.left = clamp(start.left + dx, MARGIN - rect.width + 80, w - 80);
-        rect.top = clamp(start.top + dy, 0, h - 40);
-      } else {     // resize: the opposite edge stays anchored
-        let { left, top, width: wd, height: ht } = start;
-        if (edge.includes('e')) wd = clamp(start.width + dx, MIN_W, w - start.left - MARGIN);
-        if (edge.includes('s')) ht = clamp(start.height + dy, MIN_H, h - start.top - MARGIN);
-        if (edge.includes('w')) { wd = clamp(start.width - dx, MIN_W, start.left + start.width - MARGIN); left = start.left + start.width - wd; }
-        if (edge.includes('n')) { ht = clamp(start.height - dy, MIN_H, start.top + start.height - MARGIN); top = start.top + start.height - ht; }
-        rect = { left, top, width: wd, height: ht };
-      }
+      // resize: the opposite edge stays anchored
+      let { left, top, width: wd, height: ht } = start;
+      if (edge.includes('e')) wd = clamp(start.width + dx, MIN_W, w - start.left - MARGIN);
+      if (edge.includes('s')) ht = clamp(start.height + dy, MIN_H, h - start.top - MARGIN);
+      if (edge.includes('w')) { wd = clamp(start.width - dx, MIN_W, start.left + start.width - MARGIN); left = start.left + start.width - wd; }
+      if (edge.includes('n')) { ht = clamp(start.height - dy, MIN_H, start.top + start.height - MARGIN); top = start.top + start.height - ht; }
+      rect = { left, top, width: wd, height: ht };
       apply();
     };
     const end = () => {
@@ -144,7 +140,6 @@ export function openWindow({ label, className = '', content, width = 880, height
     target.addEventListener('pointerup', end);
     target.addEventListener('pointercancel', end);
   };
-  bar.addEventListener('pointerdown', (event) => { if (!event.target.closest('.win__btn')) startGesture(event, null); });
   win.querySelectorAll('.win__grip').forEach((grip) => grip.addEventListener('pointerdown', (event) => startGesture(event, grip.dataset.edge)));
 
   /* ---------- focus, stacking, closing ---------- */

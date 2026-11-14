@@ -30,11 +30,16 @@
 //    overview      the paragraph(s) in the popup under "Overview" (use \n\n between paragraphs)
 //    contributions list of bullet points under "My Contributions"
 //    technologies  list of names under "Tools & Technologies"
+//    developedBy   list of people under "Developed By" (right after My Contributions). Each entry is a plain name ('Maria Santos')
+//                  or { name: 'Maria Santos', url: 'https://...' } to turn the name into a link to their profile or website.
+//                  Names without a url display as normal text. Leave it [] and the section is hidden.
 //    videoUrl      OPTIONAL. A Google Drive share link to a video, e.g. 'https://drive.google.com/file/d/<ID>/view?usp=sharing'
 //                  (the file must be shared as "Anyone with the link can view"). Adds an Image / Video toggle in the popup.
 //                  Leave it '' (or delete the line) and the popup stays image-only with no Video button.
 //    links         { liveDemo, github, figma, caseStudy }  — full URLs starting with https://  ('' hides that button)
 //    accent        card colour used when there is no image: 'sun' | 'bloom' | 'dusk'
+//    rights        text under "All Rights Reserved" at the bottom of the popup. Edit it per project.
+//                  Leave the line out to use the built-in default wording; '' hides the section for that project.
 // ============================================================================
 
 export const PROJECTS = [
@@ -56,6 +61,11 @@ export const PROJECTS = [
     'Implemented responsive layouts, light and dark modes, and interactive sound effects',
     ],
     technologies: ['HTML5', 'CSS3', 'JavaScript', 'Procreate', 'Figma', "Claude AI"],
+    developedBy: [
+      // { name: 'Your Name', url: 'https://...' },
+      // 'Teammate Without A Link',
+    ],
+    rights: 'All images, designs, and content shown here belong to their respective creators and may not be reused without permission.',
     links: { liveDemo: '', github: '', figma: 'https://www.figma.com/design/8WMe3PSDxeeRReThQnOq5Q/Kae-s-Mini-Portfolio?node-id=0-1&t=cfrXU19QKFLLIQDq-1', caseStudy: '' }, 
     videoUrl: '',
     images: [
@@ -84,11 +94,17 @@ export const PROJECTS = [
       'Analyzed system testing results and user feedback using Microsoft Excel',
     ],
     technologies: [
-      'Augmented Reality', 'Homography','ORB','RANSAC','Supabase','Progressive Web App','Figma',
-      'Procreate','HTML5','CSS3','JavaScript',
+      'Augmented Reality', 'Homography','ORB','RANSAC','Supabase','Progressive Web App','Figma','Procreate','HTML5','CSS3','JavaScript',
     ],
+    developedBy: [
+      { name: 'Katelyn Ong-iko' },
+      { name: 'Murphy Pillone', url: 'https://jpillone09.github.io' },
+      { name: 'Larrion Luces', url: 'https://yawnydoki.github.io' },
+      { name: 'Calvin Garcia', url: 'https://sidyecoder.github.io' },
+    ],
+    rights: 'All images, designs, and content shown here belong to their respective creators and may not be reused without permission.',
     links: { liveDemo: '', github: 'https://github.com/yawnydoki/artifact-nmfa', figma: 'https://www.figma.com/design/wAg74EDF5ouAWWJCFdIe8E/ArtiFact-NMFA?node-id=0-1&t=7BIFnK84jwQ9CRpb-1', caseStudy: 'https://drive.google.com/file/d/1Hygem8Bkc2pKlWbbByUdJqwsRfzP5MFN/view?usp=sharing' }, 
-    videoUrl: 'https://drive.google.com/file/d/1tRxxp5_PptgJsw_Qk13onUL7MoCEEoXe/view?usp=sharing',
+    videoUrl: 'https://drive.google.com/file/d/1tRxxp5_PptgJsw_Qk13onUL7MoCEEoXe/view?usp=sharing', alt: 'ArtiFact Demo, made by Lars and Murphy',
     images: [
       { src: 'imgs/projects/artifact-ar-system/cover.webp', alt: 'ArtiFact AR system home page' },
       { src: 'imgs/projects/artifact-ar-system/Introduction.webp', alt: 'Home Page' },
@@ -117,6 +133,11 @@ export const PROJECTS = [
     'Implemented course and category organization with Supabase database integration',
     'Built the application as a responsive Progressive Web App (PWA)',],
     technologies: ['Figma', 'HTML5', 'CSS3', 'JavaScript', 'Supabase', "Vercel", "Claude AI", "ChatGPT"],
+    developedBy: [
+      // { name: 'Your Name', url: 'https://...' },
+      // 'Teammate Without A Link',
+    ],
+    rights: 'All images, designs, and content shown here belong to their respective creators and may not be reused without permission.',
     links: { liveDemo: '', github: '', caseStudy: '' },
     videoUrl: '',
     images: [],
