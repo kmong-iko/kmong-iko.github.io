@@ -21,8 +21,6 @@ const CODE_ICON = '<svg class="icon" viewBox="0 0 24 24"><path d="m9 8-4 4 4 4M1
 
 const IMAGE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10.5" r="1.5"/><path d="m4 17 5-4.5 3.5 3L16 12l4 4.5"/></svg>';
 const ZOOM_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5M10.5 8.2v4.6M8.2 10.5h4.6"/></svg>';
-const EXPAND_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
-const COLLAPSE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7"/></svg>';
 const CLOSE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 const VIDEO_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5z"/></svg>';
 
@@ -54,13 +52,17 @@ const cardHtml = (project) => {
                aria-label="${escapeHtml(project.title)}: open project details">
         ${thumb}
         <div class="card__caption">
-          <h3 class="card__title">${escapeHtml(project.title)}</h3>
+          <h3 class="card__title"><span>${escapeHtml(project.title)}</span></h3>
           <ul class="card__tags">${tags}</ul>
-          <p class="card__text">${escapeHtml(project.summary)}</p>
-          <div class="card__peek" aria-hidden="true">
-            <p>${escapeHtml(project.peek || project.summary)}</p>
-            ${techs ? `<ul class="card__techs">${techs}</ul>` : ''}
-            <span class="card__cta">View project <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5"/></svg></span>
+          <div class="card__body">
+            <p class="card__text">${escapeHtml(project.summary)}</p>
+            <div class="card__peek" aria-hidden="true">
+              <p>${escapeHtml(project.peek || project.summary)}</p>
+              <div class="card__row">
+                ${techs ? `<ul class="card__techs">${techs}</ul>` : ''}
+                <span class="card__cta">View <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5"/></svg></span>
+              </div>
+            </div>
           </div>
         </div>
       </article>
@@ -174,7 +176,6 @@ function buildProjectContent(project) {
       <ul class="proj__tags">${tags}</ul>
     </header>
     <div class="proj__info" tabindex="0">
-      <div class="proj__bar"><button class="proj__expand" type="button" aria-expanded="false" aria-label="Expand details">${EXPAND_ICON}<span>Expand</span></button></div>
       ${project.overview ? `<section><h3>Overview</h3>${paragraphs(project.overview).map((p) => `<p>${escapeHtml(p)}</p>`).join('')}</section>` : ''}
       ${project.contributions?.length ? `<section><h3>My Contributions</h3>${list(project.contributions)}</section>` : ''}
       ${people ? `<section class="proj__developed"><h3>Developed By</h3><ul class="proj__people">${people}</ul></section>` : ''}
@@ -183,15 +184,39 @@ function buildProjectContent(project) {
       ${rights ? `<section class="proj__rights"><h3>All Rights Reserved</h3><p>${escapeHtml(rights)}</p></section>` : ''}
     </div>`;
 
-  /* Expand / collapse the details: the media viewer shrinks to a compact strip (CSS) so the text gets the room. */
-  const expandBtn = wrap.querySelector('.proj__expand');
-  expandBtn.addEventListener('click', () => {
-    const open = wrap.classList.toggle('is-expanded');
-    expandBtn.setAttribute('aria-expanded', String(open));
-    expandBtn.setAttribute('aria-label', open ? 'Collapse details' : 'Expand details');
-    expandBtn.innerHTML = `${open ? COLLAPSE_ICON : EXPAND_ICON}<span>${open ? 'Collapse' : 'Expand'}</span>`;
-    wrap.dispatchEvent(new CustomEvent('gallery-change', { bubbles: true }));
-  });
+  /* Auto-condense: scrolling the details down smoothly minimizes the media viewer and the title header (CSS, .is-condensed) so
+     the text gets the room; scrolling back to the top restores them. There is no button: it follows the scroll position.
+     Hysteresis keeps it calm: it only condenses when there is enough text left to scroll after the extra room appears, and it
+     only restores once the details are back at the very top, so the layout change itself can never retrigger it. */
+  const info = wrap.querySelector('.proj__info');
+  const COLLAPSE_AT = 40;   // px scrolled before the media minimizes
+  const RESTORE_AT = 2;     // px from the top at which it comes back
+  const SETTLE_MS = prefersReducedMotion() ? 0 : 900; // matches the CSS transition (0.8s): scroll events are ignored while it runs
+  let condensed = false, settledAt = 0, ticking = false;
+  /* No blank space is ever added: the popup ends right after the last section. It only minimizes when there is more text than
+     fits, i.e. when scrolling is actually needed (a popup whose text already fits has nothing to gain from the extra room). */
+  const setCondensed = (on) => {
+    condensed = on;
+    settledAt = performance.now() + SETTLE_MS;
+    wrap.classList.toggle('is-condensed', on);
+  };
+  const reviewScroll = () => {
+    ticking = false;
+    if (performance.now() < settledAt) return;
+    const top = info.scrollTop;
+    if (!condensed) {
+      if (top > COLLAPSE_AT && info.scrollHeight - info.clientHeight > COLLAPSE_AT + 8) setCondensed(true);
+    } else if (top <= RESTORE_AT) setCondensed(false);
+  };
+  /* If everything fits once the media has minimized, there is nothing left to scroll back up, so an upward wheel / swipe / key
+     at the top restores it directly. */
+  const restoreIntent = () => { if (condensed && info.scrollTop <= RESTORE_AT && performance.now() >= settledAt) setCondensed(false); };
+  info.addEventListener('wheel', (e) => { if (e.deltaY < 0) restoreIntent(); }, { passive: true });
+  let touchY = null;
+  info.addEventListener('touchstart', (e) => { touchY = e.touches[0]?.clientY ?? null; }, { passive: true });
+  info.addEventListener('touchmove', (e) => { if (touchY !== null && (e.touches[0]?.clientY ?? touchY) - touchY > 12) { restoreIntent(); touchY = e.touches[0].clientY; } }, { passive: true });
+  info.addEventListener('keydown', (e) => { if (['ArrowUp', 'PageUp', 'Home'].includes(e.key)) restoreIntent(); });
+  info.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(reviewScroll); } }, { passive: true });
 
   /* Gallery: stacked slides that cross-fade (opacity only, so switching never jumps). */
   const gallery = wrap.querySelector('.proj__gallery');
@@ -261,7 +286,7 @@ function buildProjectContent(project) {
        3s, so it pauses while the visitor is active and resumes after 3s of inactivity. It also holds still while the zoom
        overlay or the video is showing, while the tab is hidden, or when the visitor prefers reduced motion. */
     let autoplayTimer = 0;
-    const autoplayBlocked = () => gallery.classList.contains('is-video') || zoom || document.hidden || prefersReducedMotion();
+    const autoplayBlocked = () => gallery.classList.contains('is-video') || wrap.classList.contains('is-condensed') || zoom || document.hidden || prefersReducedMotion();
     const tick = () => {
       if (!wrap.isConnected || wrap.closest('.is-closing')) return; // popup closed: the loop simply ends
       if (!autoplayBlocked()) show(index + 1, false);                // silent: no slide sound for automatic changes

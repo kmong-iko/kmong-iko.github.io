@@ -45,8 +45,11 @@
   --header-h: 4.9rem;
   --footer-h: 4.75rem;
   --desk-h: 1.25rem;
-  --scallop-w: clamp(3.5rem, 12.5vw, 11rem);
-  --scallop-h: calc(var(--scallop-w) * 0.13);
+  /* Header edge (Workfolio only): a continuous row of touching semicircles, like a market-roof awning.
+     --scallop-r is the radius (= the visible depth); it keeps the previous depth (about 1/48 of the screen width) within sensible limits.
+     The row fills the whole width on its own: as many full-size semicircles as fit, centred, and the last ones are simply clipped by the screen edges. */
+  --scallop-r: clamp(0.5rem, 2.083vw, 2.5rem);
+  --scallop-h: calc(var(--scallop-r) * 0.8); /* visible depth: a little shallower than the radius, so the dips are gently flattened */
 
   /* Time-of-day atmosphere — set per [data-period] by js/background.js */
   --star-strength: 0.8;
@@ -187,19 +190,23 @@ ul { padding: 0; list-style: none; }
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;                 /* pill, nav and controls share one centre line */
   column-gap: clamp(0.4rem, 1.6vw, 1.5rem);
-  padding: 0 var(--gutter);
+  padding: 0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  box-sizing: border-box;
+  max-width: 100vw;
   background-color: var(--header-bg);
   color: var(--header-ink);
   transition: background-color 0.6s ease, color 0.6s ease;
 }
-.site-header::after { /* the scalloped lower edge, only on Workfolio */
+.site-header::after { /* the scalloped lower edge, only on Workfolio: connected semicircles hanging from the solid header */
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% - 1px);
-  height: var(--scallop-h);
-  background: radial-gradient(ellipse 50% 100% at 50% 0, var(--brand) 96%, transparent 100%) 0 0 / var(--scallop-w) 100% repeat-x;
+  top: calc(100% - 1px);                 /* 1px overlap: no hairline seam between the header and the scallops */
+  height: calc(var(--scallop-h) + 1px);
+  /* Each tile is one rounded dip (width = 2 x radius, depth = 0.8 x radius) and the tiles touch edge to edge with no gaps.
+     Sizes are fixed, never stretched to fit: the row is centred and repeats until the screen is covered. */
+  background: radial-gradient(ellipse var(--scallop-r) var(--scallop-h) at 50% 1px, var(--brand) 98.5%, transparent 100%) 50% 0 / calc(var(--scallop-r) * 2) calc(var(--scallop-h) + 1px) repeat-x;
   opacity: var(--scallop-opacity);
   transition: opacity 0.6s ease;
   pointer-events: none;
@@ -686,33 +693,33 @@ ul { padding: 0; list-style: none; }
 }
 
 /* Cards keep the Figma proportions; thumbnails are image-like surfaces, so they are the same in both themes. */
-.card { position: relative; container-type: inline-size; aspect-ratio: 1.375; overflow: hidden; border-radius: 0.5rem; box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.45); cursor: pointer; transition: transform 0.35s var(--spring), box-shadow 0.3s; -webkit-tap-highlight-color: transparent; }
+.card { position: relative; container-type: inline-size; display: flex; flex-direction: column; overflow: hidden; border-radius: 0.5rem; background: #fff9e6; color: #3b2a1a; box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.45); cursor: pointer; transition: transform 0.35s var(--spring), box-shadow 0.3s; -webkit-tap-highlight-color: transparent; }
 .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .card:active { transform: scale(0.985); }
-.card__thumb { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 18%; background: linear-gradient(135deg, var(--thumb-a), var(--thumb-b)); }
+/* Every card is built the same way: a preview image with its own fixed 16:10 frame, then a caption below it with fixed rows
+   (title, tags, description), so all cards are the same height and the text never sits on top of the image. */
+.card__thumb { position: relative; flex: none; aspect-ratio: 16 / 10; overflow: hidden; display: grid; place-items: center; background: linear-gradient(135deg, var(--thumb-a), var(--thumb-b)); }
 .card__thumb .icon { box-sizing: content-box; width: 14cqw; height: 14cqw; padding: 4cqw; border-radius: 50%; background: rgba(255, 255, 255, 0.55); color: #a33100; stroke-width: 1.6; }
 .card__thumb--sun { --thumb-a: #fff0a0; --thumb-b: #ffc785; }
 .card__thumb--bloom { --thumb-a: #ffd9a8; --thumb-b: #ffb3d9; }
 .card__thumb--dusk { --thumb-a: #e3c9ff; --thumb-b: #ffc2e2; }
 .card__caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
+  flex: none;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: 0.65rem 0.85rem 0.75rem;
-  background: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  padding: 0.5rem 0.8rem 0.6rem;
   color: #3b2a1a;
 }
-.card__title { font-size: clamp(0.9rem, 5.2cqw, 1.15rem); font-weight: 700; line-height: 1.2; }
-.card__tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.card__tags li { padding: 0.05rem 0.5rem; border: 1px solid rgba(163, 49, 0, 0.3); border-radius: 999px; color: #a33100; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
-.card__text { display: none; font-size: 0.85rem; line-height: 1.35; }
-@container (min-width: 21rem) { .card__text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } }
+.card__title { overflow: hidden; font-size: clamp(0.88rem, 5cqw, 1.1rem); font-weight: 700; line-height: 1.25; white-space: nowrap; text-overflow: ellipsis; } /* one line: the full title is in the popup */
+.card__tags { display: flex; flex-wrap: nowrap; gap: 0.3rem; height: 1.4rem; margin-top: -0.1rem; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
+.card__tags li { flex: none; padding: 0.05rem 0.5rem; border: 1px solid rgba(163, 49, 0, 0.3); border-radius: 999px; color: #a33100; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.06em; line-height: 1.25rem; text-transform: uppercase; white-space: nowrap; }
+/* The description area has one fixed height: the summary rests there, and on hover / focus the sneak peek fades in over the
+   same spot (never growing upward over the image). */
+.card__body { position: relative; display: grid; height: 3.9rem; }
+.card__body > * { grid-area: 1 / 1; min-width: 0; }
+.card__text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.85rem; line-height: 1.38; transition: opacity 0.3s ease; }
 
 @media (max-width: 760px) {
   .tools { grid-template-columns: minmax(0, 1fr); }
@@ -916,30 +923,17 @@ html.has-window, html.is-loading { overflow: hidden; }
 .win__btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .win__body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; border-radius: 0 0 14px 14px; }
 
-/* Resize grips: invisible strips on every edge and corner */
-.win__grip { position: absolute; z-index: 5; touch-action: none; }
-.win__grip--n, .win__grip--s { left: 14px; right: 14px; height: 12px; }
-.win__grip--e, .win__grip--w { top: 14px; bottom: 14px; width: 12px; }
-.win__grip--n { top: -6px; cursor: ns-resize; } .win__grip--s { bottom: -6px; cursor: ns-resize; }
-.win__grip--e { right: -6px; cursor: ew-resize; } .win__grip--w { left: -6px; cursor: ew-resize; }
-.win__grip--ne, .win__grip--nw, .win__grip--se, .win__grip--sw { width: 20px; height: 20px; z-index: 6; }
-.win__grip--ne { top: -8px; right: -8px; cursor: nesw-resize; } .win__grip--sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
-.win__grip--nw { top: -8px; left: -8px; cursor: nwse-resize; } .win__grip--se { bottom: -8px; right: -8px; cursor: nwse-resize; }
-.win.is-fullscreen .win__grip { display: none; }
 @media (pointer: coarse) {
   .win__bar { height: 2.6rem; }
   .win__btn { width: 1.15rem; height: 1.15rem; }
   .win__btn::after { inset: -0.4rem; }
-  .win__grip--n, .win__grip--s { height: 18px; } .win__grip--e, .win__grip--w { width: 18px; }
-  .win__grip--n { top: -9px; } .win__grip--s { bottom: -9px; } .win__grip--e { right: -9px; } .win__grip--w { left: -9px; }
-  .win__grip--ne, .win__grip--nw, .win__grip--se, .win__grip--sw { width: 28px; height: 28px; }
 }
 
 /* 16. Project popup + About ---------------------------------------------------- */
 .proj { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; } /* the popup never scrolls: only .proj__info does */
 /* Media viewer: its height is a share of the popup (taller when the project has portrait images). Each slide fits inside it by its
    own aspect ratio, with the caption directly under the image and the dots in their own row below, so nothing overlaps. */
-.proj__gallery { --cap-h: 0rem; --dots-h: 0rem; position: relative; container-type: size; flex: 0 1 clamp(11rem, 46%, 36rem); min-height: 9rem; margin: clamp(0.7rem, 2vw, 1.5rem) clamp(0.9rem, 3vw, 2.2rem) 0; border-radius: 0.35rem; overflow: hidden; background: transparent; touch-action: pan-y; user-select: none; -webkit-tap-highlight-color: transparent; transition: flex-basis 0.35s ease; }
+.proj__gallery { --cap-h: 0rem; --dots-h: 0rem; position: relative; container-type: size; flex: 0 1 clamp(11rem, 46%, 36rem); min-height: 9rem; margin: clamp(0.7rem, 2vw, 1.5rem) clamp(0.9rem, 3vw, 2.2rem) 0; border-radius: 0.35rem; overflow: hidden; background: transparent; touch-action: pan-y; user-select: none; -webkit-tap-highlight-color: transparent; }
 .proj__gallery[data-nav='swipe'] { cursor: grab; }
 .proj__gallery.is-dragging { cursor: grabbing; }
 .proj__gallery.has-captions { --cap-h: 1.65rem; }
@@ -979,11 +973,11 @@ html.has-window, html.is-loading { overflow: hidden; }
 @media (hover: hover) { .proj__dot:not(.is-current):hover { background: color-mix(in srgb, var(--win-ink) 45%, transparent); } }
 @media (pointer: coarse) { .proj__zoom { width: 2.4rem; height: 2.4rem; } }
 /* Fixed header bar: title + media toggle + tags. Sits between the media viewer and the scrolling details. */
-.proj__header { position: relative; z-index: 1; flex: none; padding: 0.8rem clamp(0.9rem, 3vw, 2.2rem) 0.7rem; border-bottom: 1.5px solid var(--win-line); background: var(--win-bg); }
-.proj__headline { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; }
-.proj__info { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0.1rem clamp(0.9rem, 3vw, 2.2rem) 1.8rem; font-size: 0.97rem; line-height: 1.55; outline: none; }
-.proj__title { flex: 1 1 12rem; min-width: 0; font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; }
-.proj__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0; }
+.proj__header { position: relative; z-index: 1; flex: none; padding: 0.7rem clamp(0.9rem, 3vw, 2.2rem) 0.6rem; border-bottom: 1.5px solid var(--win-line); background: var(--win-bg); }
+.proj__headline { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.3rem 1rem; }
+.proj__info { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0.1rem clamp(0.9rem, 3vw, 2.2rem) 1.2rem; font-size: 0.97rem; line-height: 1.55; outline: none; }
+.proj__title { flex: 1 1 12rem; min-width: 0; font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.01em; }
+.proj__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.3rem 0 0; }
 .tag { padding: 0.15rem 0.6rem; border-radius: 0.3rem; background: var(--tag, #2d8cff); color: #fff; font-size: 0.78rem; font-weight: 500; line-height: 1.5; }
 .tag--year { --tag: var(--accent); }
 .proj__info section { margin-top: 1.1rem; }
@@ -1010,7 +1004,7 @@ button.proj__link { border: 0; font-family: inherit; cursor: pointer; }
 
 /* Image / Video toggle (rendered only for projects with a valid Google Drive videoUrl) */
 .proj__media-toggle { flex: none; display: inline-flex; gap: 0.15rem; padding: 0.2rem; border-radius: 999px; background: var(--key-face); }
-.proj__toggle-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.85rem; border: 0; border-radius: 999px; background: transparent; color: var(--key-ink); font: inherit; font-size: 0.85rem; font-weight: 600; line-height: 1.4; cursor: pointer; transition: background-color 0.2s, color 0.2s, transform 0.3s var(--spring); }
+.proj__toggle-btn { white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.85rem; border: 0; border-radius: 999px; background: transparent; color: var(--key-ink); font: inherit; font-size: 0.85rem; font-weight: 600; line-height: 1.4; cursor: pointer; transition: background-color 0.2s, color 0.2s, transform 0.3s var(--spring); }
 .proj__toggle-btn .icon { width: 1rem; height: 1rem; stroke-width: 2; }
 .proj__toggle-btn.is-current { background: var(--accent); color: #fff; }
 .proj__toggle-btn:focus-visible { outline-offset: 2px; }
@@ -1021,31 +1015,35 @@ button.proj__link { border: 0; font-family: inherit; cursor: pointer; }
 
 /* Expandable details: the text area gets more room by shrinking the media viewer to a compact strip. The header (title, media
    buttons, tags) and the viewer stay in the layout, so nothing is covered; the details just scroll inside the space left. */
-.proj__bar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: flex-end; padding: 0.45rem 0 0.2rem; background: var(--win-bg); }
-.proj__expand { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.75rem; border: 1px solid color-mix(in srgb, var(--win-ink) 16%, transparent); border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--win-ink) 78%, transparent); font: inherit; font-size: 0.82rem; font-weight: 600; line-height: 1.4; cursor: pointer; transition: transform 0.3s var(--spring), color 0.2s, border-color 0.2s; }
-.proj__expand .icon { width: 1rem; height: 1rem; stroke-width: 2.2; }
-@media (hover: hover) { .proj__expand:hover { transform: translateY(-1px); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); } }
-.proj__expand:active { transform: scale(0.95); }
-@media (pointer: coarse) { .proj__expand { padding: 0.4rem 0.95rem; } }
-.proj.is-expanded .proj__gallery,
-.proj.is-expanded .proj__gallery[data-orient='portrait'],
-.proj.is-expanded .proj__gallery.is-video { flex-basis: clamp(6.5rem, 18%, 9rem); min-height: 6.5rem; --cap-h: 0rem; }
-.proj.is-expanded .proj__caption { display: none; }
-.proj.is-expanded .proj__info { font-size: 1.04rem; line-height: 1.65; }
-@media (prefers-reduced-motion: reduce) { .proj__expand { transition: none; } }
+/* Auto-condense (js/projects.js adds .is-condensed to .proj once the details are scrolled): the media viewer and the header's
+   extras ease away over 0.8s so the text gets the room, and everything eases back when the details return to the top. Only
+   sizes and opacity move: nothing is cut off, wrapped differently or hidden abruptly, so the text stays readable throughout. */
+.proj { --ease: cubic-bezier(0.45, 0, 0.2, 1); --dur: 0.8s; }
+.proj__gallery { transition: flex-basis var(--dur) var(--ease), min-height var(--dur) var(--ease), margin var(--dur) var(--ease), opacity 0.6s ease; }
+.proj__tags { max-height: 8rem; overflow: hidden; transition: max-height var(--dur) var(--ease), margin var(--dur) var(--ease), opacity 0.6s ease; }
+.proj__header { transition: padding var(--dur) var(--ease); }
+.proj__title { transition: font-size var(--dur) var(--ease); }
+.proj__media-toggle { max-width: 14rem; overflow: hidden; transition: max-width var(--dur) var(--ease), padding var(--dur) var(--ease), opacity 0.6s ease; }
+.proj__info { overflow-anchor: none; }
+.proj.is-condensed .proj__gallery,
+.proj.is-condensed .proj__gallery[data-orient='portrait'],
+.proj.is-condensed .proj__gallery.is-video { flex-basis: 0; min-height: 0; margin-top: 0; margin-bottom: 0; opacity: 0; pointer-events: none; }
+.proj.is-condensed .proj__tags { max-height: 0; margin-top: 0; opacity: 0; }
+.proj.is-condensed .proj__media-toggle { max-width: 0; padding-inline: 0; opacity: 0; pointer-events: none; }
+.proj.is-condensed .proj__header { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+.proj.is-condensed .proj__title { font-size: clamp(1.05rem, 2.4vw, 1.3rem); }
+@media (prefers-reduced-motion: reduce) { .proj__gallery, .proj__tags, .proj__header, .proj__title, .proj__media-toggle { transition: none; } }
 
-/* Video viewer: fills the same box as the image gallery */
+/* Video viewer: it sits in the very same box as the image gallery and is sized like an image: the same 0.5rem inset, the same
+   rounded corners and soft shadow, no background, and the same height at every screen size (so switching Image / Video never
+   changes the layout, and nothing can overflow on a phone). The player keeps its 16:9 shape and is scaled to the largest size
+   that fits that box (letterboxed, never stretched). */
 .proj__gallery.is-video .proj__frames, .proj__gallery.is-video .proj__placeholder, .proj__gallery.is-video .proj__nav, .proj__gallery.is-video .proj__dots, .proj__gallery.is-video .proj__zoom { visibility: hidden; }
-.proj__video { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; overflow: hidden; background: color-mix(in srgb, var(--win-ink) 4%, transparent); }
+.proj__video { position: absolute; inset: 0; z-index: 3; box-sizing: border-box; display: grid; place-items: center; padding: 0.5rem; overflow: hidden; background: transparent; }
 .proj__video[hidden] { display: none; }
-.proj__video-frame { display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; border: 0; opacity: 0; transition: opacity 0.3s ease; }
-/* The player always keeps its 16:9 shape and is scaled to the largest size that fits the viewer (no overflow, no stretching) */
+.proj__video-frame { grid-area: 1 / 1; display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; border: 0; border-radius: 0.4rem; box-shadow: 0 0 0 1px color-mix(in srgb, var(--win-ink) 9%, transparent), 0 14px 30px -16px rgba(0, 0, 0, 0.4); opacity: 0; transition: opacity 0.3s ease; }
 @supports (width: 1cqw) {
-  .proj__video-frame { width: min(100cqw, calc(100cqh * 16 / 9)); height: auto; aspect-ratio: 16 / 9; }
-}
-.proj__video-frame { grid-area: 1 / 1; }
-@media (max-width: 640px) { /* phones: give the video a 16:9 viewer so it is not squeezed into a short strip */
-  .proj__gallery.is-video { flex-basis: min(calc(56.25vw - 0.5rem), 60%); }
+  .proj__video-frame { width: min(calc(100cqw - 1rem), calc((100cqh - 1rem) * 16 / 9)); height: auto; aspect-ratio: 16 / 9; }
 }
 .proj__video.is-loaded .proj__video-frame { opacity: 1; }
 .proj__video-status { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.5rem; padding: 1rem; overflow: auto; text-align: center; font-size: 0.9rem; font-weight: 500; line-height: 1.4; color: var(--win-ink); }
@@ -1080,27 +1078,30 @@ button.proj__link { border: 0; font-family: inherit; cursor: pointer; }
 .about h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
 
 /* 17. Project hover sneak peek ------------------------------------------------- */
-.card__thumb { transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s; }
+.card__thumb { transition: filter 0.4s; }
+.card__thumb--photo img, .card__thumb .icon { transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease; } /* the image zooms inside its own frame, never over the text */
 .card__thumb--photo { padding: 0; display: block; }
-.card__thumb--photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.55s ease; }
+.card__thumb--photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
 .card__thumb--photo img.is-current { opacity: 1; }
-.card__caption { transition: background-color 0.3s, padding 0.3s; }
-.card__peek { display: grid; gap: 0.35rem; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease 0.05s; }
-.card__peek p { font-size: 0.85rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.card__techs { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-.card__techs li { padding: 0.05rem 0.5rem; border-radius: 0.3rem; background: var(--key-face); color: #3b2a1a; font-size: 0.7rem; font-weight: 500; }
+.card__peek { align-content: start; display: grid; gap: 0.25rem; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s; }
+.card__peek p { font-size: 0.85rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card__row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-width: 0; height: 1.3rem; }
+.card__techs { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: nowrap; gap: 0.25rem; height: 1.3rem; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.card__techs li { flex: none; white-space: nowrap; padding: 0.05rem 0.5rem; border-radius: 0.3rem; background: var(--key-face); color: #3b2a1a; font-size: 0.7rem; font-weight: 500; }
 :root[data-theme="dark"] .card__techs li { color: #fff; } /* dark chip face: white text for readability */
-.card__cta { display: inline-flex; align-items: center; gap: 0.3rem; color: #a33100; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.card__cta { flex: none; display: inline-flex; align-items: center; gap: 0.3rem; color: #a33100; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
 .card__cta .icon { width: 0.95rem; height: 0.95rem; stroke-width: 2.2; transition: transform 0.3s var(--spring); }
-.card:focus-visible .card__peek { max-height: 10rem; opacity: 1; }
-.card:focus-visible .card__text { display: none; }
-.card:focus-visible .card__thumb { transform: scale(1.06); filter: saturate(1.08); }
+.card:focus-visible .card__peek { opacity: 1; visibility: visible; transition-delay: 0s; }
+.card:focus-visible .card__text { opacity: 0; }
+.card:focus-visible .card__thumb { filter: saturate(1.08); }
+.card:focus-visible .card__thumb--photo img, .card:focus-visible .card__thumb .icon { transform: scale(1.06); }
 @media (hover: hover) {
   .card:hover { transform: translateY(-3px); box-shadow: 0 18px 28px -16px rgba(0, 0, 0, 0.5); }
-  .card:hover .card__peek { max-height: 10rem; opacity: 1; }
-  .card:hover .card__text { display: none; }
+  .card:hover .card__peek { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .card:hover .card__text { opacity: 0; }
   .card:hover .card__caption { background: rgba(255, 253, 232, 0.94); }
-  .card:hover .card__thumb { transform: scale(1.06); filter: saturate(1.08); }
+  .card:hover .card__thumb { filter: saturate(1.08); }
+  .card:hover .card__thumb--photo img, .card:hover .card__thumb .icon { transform: scale(1.06); }
   .card:hover .card__cta .icon { transform: translateX(3px); }
 }
 

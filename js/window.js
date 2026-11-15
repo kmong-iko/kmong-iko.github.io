@@ -1,6 +1,6 @@
 // macOS-style popup windows (used by "More about me?" and the project viewer).
 //   • orange title bar with a red close button and a green full-screen button (there is NO minimize button)
-//   • the window is static (it opens centered and cannot be dragged); resize from any edge or corner,
+//   • the window is static: it opens centered and can neither be dragged nor resized by its edges or corners;
 //     double-click the bar (or press green) to go full-screen and again to restore the previous size/position
 //   • Esc or a click on the dimmed backdrop closes the top-most window; focus returns to whatever opened it
 //   • works with mouse, touch and pen (pointer events)
@@ -8,7 +8,6 @@
 const MIN_W = 300, MIN_H = 240;
 const MARGIN = 8;                 // keep this much of the window on screen
 const ANIMATE_MS = 280;
-const EDGES = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 
 const root = document.documentElement;
 const stack = [];                 // open windows, top-most last
@@ -39,8 +38,7 @@ export function openWindow({ label, className = '', content, width = 880, height
         <button class="win__btn win__btn--zoom" type="button" aria-label="Enter full screen" aria-pressed="false"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.4 8.6V5.2m0 3.4h3.4M8.6 3.4v3.4m0-3.4H5.2"/></svg></button>
       </div>
     </div>
-    <div class="win__body"></div>
-    ${EDGES.map((edge) => `<span class="win__grip win__grip--${edge}" data-edge="${edge}" aria-hidden="true"></span>`).join('')}`;
+    <div class="win__body"></div>`;
   win.querySelector('.win__body').append(content);
   backdrop.append(win);
   document.body.append(backdrop);
@@ -106,41 +104,6 @@ export function openWindow({ label, className = '', content, width = 880, height
   };
   zoomButton.addEventListener('click', () => setFullscreen(!restoreRect));
   bar.addEventListener('dblclick', (event) => { if (!event.target.closest('.win__btn')) setFullscreen(!restoreRect); });
-
-  /* ---------- resize (the window itself is static: no dragging) ---------- */
-  const startGesture = (event, edge) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    if (restoreRect) return; // full-screen windows stay put
-    event.preventDefault();
-    focusWindow();
-    const start = { x: event.clientX, y: event.clientY, ...rect };
-    const target = event.currentTarget;
-    target.setPointerCapture(event.pointerId);
-    win.classList.add('is-dragging');
-
-    const move = (e) => {
-      const dx = e.clientX - start.x, dy = e.clientY - start.y;
-      const { w, h } = viewport();
-      // resize: the opposite edge stays anchored
-      let { left, top, width: wd, height: ht } = start;
-      if (edge.includes('e')) wd = clamp(start.width + dx, MIN_W, w - start.left - MARGIN);
-      if (edge.includes('s')) ht = clamp(start.height + dy, MIN_H, h - start.top - MARGIN);
-      if (edge.includes('w')) { wd = clamp(start.width - dx, MIN_W, start.left + start.width - MARGIN); left = start.left + start.width - wd; }
-      if (edge.includes('n')) { ht = clamp(start.height - dy, MIN_H, start.top + start.height - MARGIN); top = start.top + start.height - ht; }
-      rect = { left, top, width: wd, height: ht };
-      apply();
-    };
-    const end = () => {
-      target.removeEventListener('pointermove', move);
-      target.removeEventListener('pointerup', end);
-      target.removeEventListener('pointercancel', end);
-      win.classList.remove('is-dragging');
-    };
-    target.addEventListener('pointermove', move);
-    target.addEventListener('pointerup', end);
-    target.addEventListener('pointercancel', end);
-  };
-  win.querySelectorAll('.win__grip').forEach((grip) => grip.addEventListener('pointerdown', (event) => startGesture(event, grip.dataset.edge)));
 
   /* ---------- focus, stacking, closing ---------- */
   const focusWindow = () => { backdrop.style.zIndex = String(++zCounter); };
